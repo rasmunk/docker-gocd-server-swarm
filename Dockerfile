@@ -9,6 +9,11 @@ ARG JAR_NAME=docker-swarm-elastic-agents-${PLUGIN_SWARM_VERSION}.jar
 
 ARG GO_DATA_DIR=/godata
 
+USER root
+# Ensure that the timezone is automatically picked up
+RUN apk add tzdata
+
+USER go
 # Install the docker swarm plugin
 RUN wget "https://github.com/gocd-contrib/docker-swarm-elastic-agent-plugin/releases/download/v${PLUGIN_SWARM_VERSION}/${JAR_NAME}" -P /tmp/
 
