@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  manager:
+    image: ucphhpc/gocd-server-swarm:edge
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    ports:
+      - 8153:8153
+    env_file:
+      - defaults.env
+    user: "${UID}:${GID}"
