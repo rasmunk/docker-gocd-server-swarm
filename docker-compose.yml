@@ -8,5 +8,5 @@ services:
     ports:
       - 8153:8153
     env_file:
-      - defaults.env
+      - .env
     user: "${UID}:${GID}"
