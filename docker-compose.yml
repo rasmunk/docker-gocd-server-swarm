@@ -5,10 +5,7 @@ services:
     image: ucphhpc/gocd-server-swarm:edge
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      - godata_config:/godata/config:rw
-      - godata_plugins:/godata/plugins:rw
-      - godata_db:/godata/db:rw
-      - godata_logs:/godata/logs:rw
+      - godata:/godata:rw
     ports:
       - 8153:8153
     env_file:
@@ -16,8 +13,4 @@ services:
     user: "${UID}:${GID}"
 
 volumes:
-  godata_config:
-  godata_plugins:
-  godata_db:
-  godata_logs:
-  
+  godata:
