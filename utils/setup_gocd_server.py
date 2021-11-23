@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 import requests
 import json
-from defaults import cluster_profiles_path, elastic_agent_profile_path, repositories_path
+from defaults import (
+    cluster_profiles_path,
+    elastic_agent_profile_path,
+    repositories_path,
+)
 from config import load_config
 
 
@@ -21,8 +25,10 @@ AUTH_TOKEN = ""
 
 def authenticate(session, headers=None):
     if not headers:
-        headers = {"Authorization": "bearer {}".format(AUTH_TOKEN),
-                   "Accept": "application/vnd.go.cd.v1+json"}
+        headers = {
+            "Authorization": "bearer {}".format(AUTH_TOKEN),
+            "Accept": "application/vnd.go.cd.v1+json",
+        }
     auth_url = "{}/current_user".format(API_URL)
     return session.get(auth_url, headers=headers)
 
@@ -61,8 +67,10 @@ def get_cluster(session, id, headers=None):
 
 def create_cluster_profile(session, data=None, headers=None):
     if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v1+json",
-                   "Content-Type": "application/json"}
+        headers = {
+            "Accept": "application/vnd.go.cd.v1+json",
+            "Content-Type": "application/json",
+        }
     if not data:
         data = {}
     json_data = json.dumps(data)
@@ -87,8 +95,10 @@ def get_elastic_agent(session, id, headers=None):
 
 def create_elastic_agent_profile(session, data=None, headers=None):
     if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v2+json",
-                   "Content-Type": "application/json"}
+        headers = {
+            "Accept": "application/vnd.go.cd.v2+json",
+            "Content-Type": "application/json",
+        }
     if not data:
         data = {}
     json_data = json.dumps(data)
@@ -107,24 +117,50 @@ def get_config_repo(session, id, headers=None):
 
 def create_config_repo(session, data=None, headers=None):
     if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v4+json",
-                   "Content-Type": "application/json"}
+        headers = {
+            "Accept": "application/vnd.go.cd.v4+json",
+            "Content-Type": "application/json",
+        }
     if not data:
         data = {}
     json_data = json.dumps(data)
     return post(session, CONFIG_REPO_URL, data=json_data, headers=headers).text
 
 
-def auth_repo_required(repository_config):
+def is_auth_repo(repository_config):
     if "authentication" not in repository_config:
         return False
     if "required" not in repository_config["authentication"]:
         return False
-    if not repository_config["authentication"]
+    if not repository_config["authentication"]["required"]:
+        return False
+    return True
 
-    if "required" in repository_config["authentication"]:
-        
-        return repository_config["authentcation"]["secret"]
+
+def extract_auth_data(repository_config):
+    return repository_config["authentcation"]
+
+
+def get_secret(auth_data):
+    if "secret" not in auth_data:
+        return False
+    return auth_data["secret"]
+
+
+def get_secret_manager(repository_config):
+    return repositories_config["authentication"]["secret_plugin"]
+
+
+def create_secret(session, data=None, headers=None):
+    if not headers:
+        headers = {
+            "Accept": "application/vnd.go.cd.v4+json",
+            "Content-Type": "application/json",
+        }
+    if not data:
+        data = {}
+    json_data = json.dumps(data)
+    return post(session, CONFIG_REPO_URL, data=json_data, headers=headers).text
 
 
 if __name__ == "__main__":
@@ -153,12 +189,13 @@ if __name__ == "__main__":
         # Create cluster profile
         existing_cluster = get_cluster(session, cluster_profiles_config["id"])
         if not existing_cluster:
-            created = create_cluster_profile(
-                session,
-                data=cluster_profiles_config
-            )
+            created = create_cluster_profile(session, data=cluster_profiles_config)
             if not created:
-                print("Failed to create cluster profile: {}".format(cluster_profiles_config))
+                print(
+                    "Failed to create cluster profile: {}".format(
+                        cluster_profiles_config
+                    )
+                )
                 exit(1)
 
         existing_agent = get_elastic_agent(session, elastic_agent_config["id"])
@@ -174,25 +211,25 @@ if __name__ == "__main__":
             if not existing_repo:
                 # Check whether a secret auth token is required
                 extra_config_kwargs = {}
-                if auth_repo_required(repository_config):
-                    auth_repo_data = extract_auth_data(repository_config)
-                    secret = get_secret(auth_repo_data["id"])
+                if is_auth_repo(repository_config):
+                    auth_data = extract_auth_data(repository_config)
+                    secret_manager = get_secret_manager(repository_config)
+                    secret = get_secret(auth_data)
                     if not secret:
                         created = create_secret(repository_config)
                         if not created:
                             print("Failed to create new secret")
                         extra_config_kwargs["secret"] = created
 
-                created = create_config_repo(session, data=repository_config, extra_config_kwargs=extra_config_kwargs)
+                created = create_config_repo(
+                    session,
+                    data=repository_config,
+                    extra_config_kwargs=extra_config_kwargs,
+                )
                 if not created:
                     print("Failed to create elastic agent profile: {}".format(created))
                     exit(1)
                 print(created)
-                    
 
         # Associate GitHub token with the specified repo
-
         print("Setup SSH keys for private checkouts")
-
-        
-        
