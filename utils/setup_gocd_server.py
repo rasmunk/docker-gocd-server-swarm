@@ -2,7 +2,7 @@
 import requests
 import json
 from defaults import cluster_profiles_path, elastic_agent_profile_path, repositories_path
-from config import load_config, save_config
+from config import load_config
 
 
 BASE_URL = ""
@@ -115,6 +115,18 @@ def create_config_repo(session, data=None, headers=None):
     return post(session, CONFIG_REPO_URL, data=json_data, headers=headers).text
 
 
+def auth_repo_required(repository_config):
+    if "authentication" not in repository_config:
+        return False
+    if "required" not in repository_config["authentication"]:
+        return False
+    if not repository_config["authentication"]
+
+    if "required" in repository_config["authentication"]:
+        
+        return repository_config["authentcation"]["secret"]
+
+
 if __name__ == "__main__":
     cluster_profiles_config = load_config(path=cluster_profiles_path)
     elastic_agent_config = load_config(path=elastic_agent_profile_path)
@@ -160,8 +172,27 @@ if __name__ == "__main__":
         for repository_config in repositories_config:
             existing_repo = get_config_repo(session, repository_config["id"])
             if not existing_repo:
-                created = create_config_repo(session, data=repository_config)
+                # Check whether a secret auth token is required
+                extra_config_kwargs = {}
+                if auth_repo_required(repository_config):
+                    auth_repo_data = extract_auth_data(repository_config)
+                    secret = get_secret(auth_repo_data["id"])
+                    if not secret:
+                        created = create_secret(repository_config)
+                        if not created:
+                            print("Failed to create new secret")
+                        extra_config_kwargs["secret"] = created
+
+                created = create_config_repo(session, data=repository_config, extra_config_kwargs=extra_config_kwargs)
                 if not created:
                     print("Failed to create elastic agent profile: {}".format(created))
                     exit(1)
                 print(created)
+                    
+
+        # Associate GitHub token with the specified repo
+
+        print("Setup SSH keys for private checkouts")
+
+        
+        
