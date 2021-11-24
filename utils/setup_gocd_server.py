@@ -148,7 +148,7 @@ def get_secret(auth_data):
 
 
 def get_secret_manager(repository_config):
-    return repositories_config["authentication"]["secret_plugin"]
+    return repository_config["authentication"]["secret_plugin"]
 
 
 def create_secret(session, data=None, headers=None):
