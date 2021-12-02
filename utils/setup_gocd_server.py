@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import requests
 import json
 from defaults import (
@@ -8,8 +9,11 @@ from defaults import (
 )
 from config import load_config
 
+if "BASE_URL" in os.environ:
+    BASE_URL = os.environ["BASE_URL"]
+else:
+    BASE_URL = ""
 
-BASE_URL = ""
 GO_URL = "{}/go".format(BASE_URL)
 API_URL = "{}/api".format(GO_URL)
 
@@ -19,8 +23,10 @@ ADMIN_URL = "{}/admin".format(API_URL)
 CLUSTER_PROFILES_URL = "{}/elastic/cluster_profiles".format(ADMIN_URL)
 CONFIG_REPO_URL = "{}/config_repos".format(ADMIN_URL)
 
-
-AUTH_TOKEN = ""
+if "AUTH_TOKEN" in os.environ:
+    AUTH_TOKEN = os.environ["AUTH_TOKEN"]
+else:
+    AUTH_TOKEN = ""
 
 
 def authenticate(session, headers=None):
@@ -233,3 +239,4 @@ if __name__ == "__main__":
 
         # Associate GitHub token with the specified repo
         print("Setup SSH keys for private checkouts")
+        
