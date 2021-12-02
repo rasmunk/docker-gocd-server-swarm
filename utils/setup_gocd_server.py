@@ -239,4 +239,3 @@ if __name__ == "__main__":
 
         # Associate GitHub token with the specified repo
         print("Setup SSH keys for private checkouts")
-        
