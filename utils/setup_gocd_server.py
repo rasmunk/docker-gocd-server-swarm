@@ -3,9 +3,10 @@ import os
 import requests
 import json
 from defaults import (
+    authorization_config_path,
     cluster_profiles_path,
     elastic_agent_profile_path,
-    repositories_path,
+    repositories_path
 )
 from config import load_config
 
@@ -26,6 +27,8 @@ CONFIG_REPO_URL = "{}/config_repos".format(ADMIN_URL)
 if "AUTH_TOKEN" in os.environ:
     AUTH_TOKEN = os.environ["AUTH_TOKEN"]
 else:
+#   The AUTH_TOKEN is the one generate within the GOCD server
+#   (Not GitHub)
     AUTH_TOKEN = ""
 
 
@@ -36,7 +39,11 @@ def authenticate(session, headers=None):
             "Accept": "application/vnd.go.cd.v1+json",
         }
     auth_url = "{}/current_user".format(API_URL)
-    return session.get(auth_url, headers=headers)
+    resp = session.get(auth_url, headers=headers)
+    if resp.status_code == 200:
+        return True
+    print(resp.text)
+    return False
 
 
 def get(session, url, *args, **kwargs):
@@ -121,7 +128,7 @@ def get_config_repo(session, id, headers=None):
     return None
 
 
-def create_config_repo(session, data=None, headers=None, extra_config_kwargs=None):
+def create_config_repo(session, config_id=None, data=None, headers=None, extra_config_kwargs=None):
     if not headers:
         headers = {
             "Accept": "application/vnd.go.cd.v4+json",
@@ -129,7 +136,9 @@ def create_config_repo(session, data=None, headers=None, extra_config_kwargs=Non
         }
     if not data:
         data = {}
-    json_data = json.dumps(data)
+
+    request_data = {"id": config_id, **data}
+    json_data = json.dumps(request_data)
     return post(session, CONFIG_REPO_URL, data=json_data, headers=headers).text
 
 
@@ -144,7 +153,7 @@ def is_auth_repo(repository_config):
 
 
 def extract_auth_data(repository_config):
-    return repository_config["authentcation"]
+    return repository_config["authentication"]
 
 
 def get_secret(auth_data):
@@ -173,6 +182,8 @@ if __name__ == "__main__":
     cluster_profiles_config = load_config(path=cluster_profiles_path)
     elastic_agent_config = load_config(path=elastic_agent_profile_path)
     repositories_config = load_config(path=repositories_path)
+    # TODO, load and create the authorization config
+    # authorization_config = load_config(path=authorization_config_path)
 
     if not cluster_profiles_config:
         print("Failed loading: {}".format(cluster_profiles_path))
@@ -186,12 +197,19 @@ if __name__ == "__main__":
         print("Failed loading: {}".format(repositories_path))
         exit(1)
 
-    with requests.Session() as session:
-        print("Auth")
-        authed = authenticate(session)
-        # print(authed.status_code, authed.text)
+#    if not authorization_config:
+#        print("Failed loading: {}".format(authorization_config_path)
+#        exit(1)
 
-        print("Cluster profiles")
+    with requests.Session() as session:
+        print("Authenticate")
+        authed = authenticate(session)
+        if not authed:
+            exit(2)
+
+#        print("Setup Authorization config")
+
+        print("Setup Cluster profiles")
         # Create cluster profile
         existing_cluster = get_cluster(session, cluster_profiles_config["id"])
         if not existing_cluster:
@@ -211,7 +229,7 @@ if __name__ == "__main__":
                 print("Failed to create elastic agent profile: {}".format(created))
                 exit(1)
 
-        print("Config Repositories")
+        print("Create Config Repositories")
         for repository_config in repositories_config:
             existing_repo = get_config_repo(session, repository_config["id"])
             if not existing_repo:
@@ -229,7 +247,8 @@ if __name__ == "__main__":
 
                 created = create_config_repo(
                     session,
-                    data=repository_config,
+                    config_id=repository_config["id"],
+                    data=repository_config["config"],
                     extra_config_kwargs=extra_config_kwargs,
                 )
                 if not created:

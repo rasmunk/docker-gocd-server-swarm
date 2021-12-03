@@ -10,3 +10,4 @@ elastic_agent_profile_path = os.path.join(
     default_config_path, "elastic_agent_profiles.yml"
 )
 repositories_path = os.path.join(default_config_path, "repositories.yml")
+authorization_config_path = os.path.join(default_base_path, "authorization_config.yml")
