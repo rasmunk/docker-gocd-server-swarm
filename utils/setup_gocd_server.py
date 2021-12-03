@@ -121,7 +121,7 @@ def get_config_repo(session, id, headers=None):
     return None
 
 
-def create_config_repo(session, data=None, headers=None):
+def create_config_repo(session, data=None, headers=None, extra_config_kwargs=None):
     if not headers:
         headers = {
             "Accept": "application/vnd.go.cd.v4+json",
