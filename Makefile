@@ -17,6 +17,11 @@ down:
 build:
 	docker-compose build $(ARGS)
 
+dockerclean:
+	docker image prune -f
+	docker container prune -f
+	docker volume prune -f
+
 clean:
 	docker rmi -f $(OWNER)/$(IMAGE):$(BUILD_TAG) $(ARGS)
 
