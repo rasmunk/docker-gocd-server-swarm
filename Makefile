@@ -6,7 +6,7 @@ ARGS=
 
 .PHONY: build
 
-all: clean build test
+all: clean build
 
 daemon:
 	docker stack deploy --compose-file docker-compose.yml $(SERVICE_NAME) $(ARGS)
