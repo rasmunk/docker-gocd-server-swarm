@@ -34,7 +34,7 @@ RUN apk add tzdata
 # Add the USER and GROUP
 RUN addgroup -g ${GID} ${GROUP} && \
     adduser ${USER} ${GROUP}
-g
+
 # Create the secrets file and set permissions
 RUN mkdir -p ${GO_SECRET_DIR} && \
     touch ${GO_SECRET_FILE} && \

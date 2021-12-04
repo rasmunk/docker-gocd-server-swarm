@@ -20,7 +20,7 @@ services:
         GO_DATA_DIR: ${GO_DATA_DIR}
         GO_SECRET_DIR: ${GO_SECRET_DIR}
         GO_SECRET_FILE: ${GO_SECRET_FILE}
-    image: ucphhpc/gocd-server-swarm:edge
+    image: ucphhpc/gocd-server-swarm:${BUILD_TAG}
     networks:
       - nginx_default
     volumes:

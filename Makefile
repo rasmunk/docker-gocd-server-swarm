@@ -1,6 +1,6 @@
 OWNER=ucphhpc
 IMAGE=gocd-server-swarm
-TAG=edge
+BUILD_TAG=edge
 SERVICE_NAME=gocd
 ARGS=
 
@@ -9,16 +9,16 @@ ARGS=
 all: clean build test
 
 daemon:
-	docker stack deploy --compose-file docker-compose.yml $(SERVICE_NAME)
+	docker stack deploy --compose-file docker-compose.yml $(SERVICE_NAME) $(ARGS)
 
 down:
-	docker stack rm $(SERVICE_NAME)
+	docker stack rm $(SERVICE_NAME) $(ARGS)
 
 build:
-	docker build -t $(OWNER)/$(IMAGE):$(TAG) $(ARGS) .
+	docker-compose build $(ARGS)
 
 clean:
-	docker rmi -f $(OWNER)/$(IMAGE):$(TAG) $(ARGS)
+	docker rmi -f $(OWNER)/$(IMAGE):$(BUILD_TAG) $(ARGS)
 
 push:
-	docker push ${OWNER}/${IMAGE}:${TAG} $(ARGS)
+	docker push ${OWNER}/${IMAGE}:${BUILD_TAG} $(ARGS)
