@@ -6,9 +6,13 @@ from defaults import (
     authorization_config_path,
     cluster_profiles_path,
     elastic_agent_profile_path,
-    repositories_path
+    repositories_path,
+    secret_managers_config_path
 )
 from config import load_config
+
+
+CONTENT_TYPE = "application/json"
 
 if "BASE_URL" in os.environ:
     BASE_URL = os.environ["BASE_URL"]
@@ -18,18 +22,19 @@ else:
 GO_URL = "{}/go".format(BASE_URL)
 API_URL = "{}/api".format(GO_URL)
 
-
 ELASTIC_AGENT_URL = "{}/elastic/profiles".format(API_URL)
 ADMIN_URL = "{}/admin".format(API_URL)
 CLUSTER_PROFILES_URL = "{}/elastic/cluster_profiles".format(ADMIN_URL)
 CONFIG_REPO_URL = "{}/config_repos".format(ADMIN_URL)
+SECRET_CONFIG_URL = "{}/secret_configs".format(ADMIN_URL)
 
 if "AUTH_TOKEN" in os.environ:
     AUTH_TOKEN = os.environ["AUTH_TOKEN"]
 else:
-#   The AUTH_TOKEN is the one generate within the GOCD server
-#   (Not GitHub)
     AUTH_TOKEN = ""
+    # The AUTH_TOKEN is the one generate within the GOCD server
+    # (Not GitHub)
+
 
 
 def authenticate(session, headers=None):
@@ -82,7 +87,7 @@ def create_cluster_profile(session, data=None, headers=None):
     if not headers:
         headers = {
             "Accept": "application/vnd.go.cd.v1+json",
-            "Content-Type": "application/json",
+            "Content-Type": CONTENT_TYPE,
         }
     if not data:
         data = {}
@@ -110,7 +115,7 @@ def create_elastic_agent_profile(session, data=None, headers=None):
     if not headers:
         headers = {
             "Accept": "application/vnd.go.cd.v2+json",
-            "Content-Type": "application/json",
+            "Content-Type": CONTENT_TYPE,
         }
     if not data:
         data = {}
@@ -132,7 +137,7 @@ def create_config_repo(session, config_id=None, data=None, headers=None, extra_c
     if not headers:
         headers = {
             "Accept": "application/vnd.go.cd.v4+json",
-            "Content-Type": "application/json",
+            "Content-Type": CONTENT_TYPE,
         }
     if not data:
         data = {}
@@ -155,27 +160,44 @@ def is_auth_repo(repository_config):
 def extract_auth_data(repository_config):
     return repository_config["authentication"]
 
-
 def get_secret(auth_data):
     if "secret" not in auth_data:
         return False
     return auth_data["secret"]
 
 
-def get_secret_manager(repository_config):
+def get_repo_secret_manager(repository_config):
     return repository_config["authentication"]["secret_plugin"]
 
+def get_secret_config(session, id, headers=None):
+    if not headers:
+        headers = {"Accept": "application/vnd.go.cd.v4+json"}
+    id_url = "{}/{}".format(SECRET_CONFIG_URL, id)
+    resp = get(session, id_url, headers=headers)
+    if resp.status_code == 200:
+        return resp.text
+    return None
 
-def create_secret(session, data=None, headers=None):
+
+def get_secret_configs(session, headers=None):
     if not headers:
         headers = {
-            "Accept": "application/vnd.go.cd.v4+json",
-            "Content-Type": "application/json",
+            "Accept": "application/vnd.go.cd.v3+json",
+            "Content-Type": CONTENT_TYPE
+        }
+    return get(session, SECRET_CONFIG_URL)
+
+
+def create_secret_config(session, data=None, headers=None):
+    if not headers:
+        headers = {
+            "Accept": "application/vnd.go.cd.v3+json",
+            "Content-Type": CONTENT_TYPE,
         }
     if not data:
         data = {}
     json_data = json.dumps(data)
-    return post(session, CONFIG_REPO_URL, data=json_data, headers=headers).text
+    return post(session, SECRET_CONFIG_URL, data=json_data, headers=headers).text
 
 
 if __name__ == "__main__":
@@ -183,23 +205,21 @@ if __name__ == "__main__":
     elastic_agent_config = load_config(path=elastic_agent_profile_path)
     repositories_config = load_config(path=repositories_path)
     # TODO, load and create the authorization config
-    # authorization_config = load_config(path=authorization_config_path)
+    authorization_config = load_config(path=authorization_config_path)
+    secret_managers_config = load_config(path=secret_managers_config_path)
 
-    if not cluster_profiles_config:
-        print("Failed loading: {}".format(cluster_profiles_path))
-        exit(1)
+    configs = [
+        {"path": cluster_profiles_path, "config": cluster_profiles_config},
+        {"path": elastic_agent_profile_path, "config": elastic_agent_config},
+        {"path": repositories_path, "config": repositories_config},
+        {"path": secret_managers_config_path, "config": secret_managers_config},
+        {"path": authorization_config_path, "config": authorization_config}
+    ]
 
-    if not elastic_agent_config:
-        print("Failed loading: {}".format(elastic_agent_profile_path))
-        exit(1)
-
-    if not repositories_config:
-        print("Failed loading: {}".format(repositories_path))
-        exit(1)
-
-#    if not authorization_config:
-#        print("Failed loading: {}".format(authorization_config_path)
-#        exit(1)
+    for config in configs:
+        if not config["config"]:
+            print("Failed loading: {}".format(config["path"]))
+            exit(1)
 
     with requests.Session() as session:
         print("Authenticate")
@@ -208,6 +228,17 @@ if __name__ == "__main__":
             exit(2)
 
 #        print("Setup Authorization config")
+
+        print("Setup Secret Manager")
+        for secret_manager_config in secret_managers_config:
+            exists = get_secret_config(session, secret_manager_config["id"])
+            if not exists:
+                created = create_secret_config(session, data=secret_manager_config)
+                if not created:
+                    print("Failed to create secret config: {}".format(
+                        secret_manager_config
+                    ))
+                    exit(3)
 
         print("Setup Cluster profiles")
         # Create cluster profile
@@ -220,14 +251,14 @@ if __name__ == "__main__":
                         cluster_profiles_config
                     )
                 )
-                exit(1)
+                exit(4)
 
         existing_agent = get_elastic_agent(session, elastic_agent_config["id"])
         if not existing_agent:
             created = create_elastic_agent_profile(session, data=elastic_agent_config)
             if not created:
                 print("Failed to create elastic agent profile: {}".format(created))
-                exit(1)
+                exit(5)
 
         print("Create Config Repositories")
         for repository_config in repositories_config:
