@@ -2,12 +2,31 @@ version: '3.7'
 
 services:
   manager:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      # IMPORTANT: pass all ARGs used in Dockerfile here to allow optional override from .env file
+      args:
+        UID: ${UID}
+        GID: ${GID}
+        PLUGIN_SWARM_MAJOR_VERSION: ${PLUGIN_SWARM_MAJOR_VERSION}
+        PLUGIN_SWARM_MINOR_VERSION: ${PLUGIN_SWARM_MINOR_VERSION}
+        PLUGIN_SWARM_VERSION: ${PLUGIN_SWARM_MAJOR_VERSION}-${PLUGIN_SWARM_MINOR_VERSION}
+        SWARM_JAR_NAME: ${SWARM_JAR_NAME}
+        PLUGIN_GITHUB_MAJOR_VERSION: ${PLUGIN_GITHUB_MAJOR_VERSION}
+        PLUGIN_GITHUB_MINOR_VERSION: ${PLUGIN_GITHUB_MINOR_VERSION}
+        PLUGIN_GITHUB_VERSION: ${PLUGIN_GITHUB_MAJOR_VERSION}-${PLUGIN_GITHUB_MINOR_VERSION}
+        GITHUB_JAR_NAME: ${GITHUB_JAR_NAME}
+        GO_DATA_DIR: ${GO_DATA_DIR}
+        GO_SECRET_DIR: ${GO_SECRET_DIR}
+        GO_SECRET_FILE: ${GO_SECRET_FILE}
     image: ucphhpc/gocd-server-swarm:edge
     networks:
       - nginx_default
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - godata:/godata:rw
+      - gosecrets:/gosecrets:rw
     ports:
       - 8153:8153
     env_file:
@@ -16,6 +35,7 @@ services:
 
 volumes:
   godata:
+  gosecrets:
 
 networks:
   nginx_default:
