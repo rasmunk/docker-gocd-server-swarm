@@ -120,6 +120,12 @@ def get_repo_secret(auth_data):
 def get_repo_secret_manager(repository_config):
     return repository_config["authentication"]["secret_plugin"]
 
+
+def get_secret_configs(session, headers=None):
+    if not headers:
+        headers = ACCEPT_HEADER_3
+    return get(session, SECRET_CONFIG_URL)
+
 def get_secret_manager(session, id):
     return get_type(session, SECRET_CONFIG_URL, id, headers=ACCEPT_HEADER_3)
 
@@ -254,7 +260,6 @@ if __name__ == "__main__":
                             )
                         )
                     # secret = get_type(session, SECRET_CONFIG_URL)
-
                     # if not secret:
                     # created = create_secret(repository_config)
                     #    created = create_secret(repository_config)
