@@ -20,7 +20,7 @@ from config import load_config
 if "BASE_URL" in os.environ:
     BASE_URL = os.environ["BASE_URL"]
 else:
-    BASE_URL = "https://mechanist.rasmunk.dk"
+    BASE_URL = ""
 
 # Public URLs
 GO_URL = "{}/go".format(BASE_URL)
@@ -38,7 +38,7 @@ SECRET_CONFIG_URL = "{}/secret_configs".format(ADMIN_URL)
 if "AUTH_TOKEN" in os.environ:
     AUTH_TOKEN = os.environ["AUTH_TOKEN"]
 else:
-    AUTH_TOKEN = "e657c2526dd045c16a0a18104983073044aad222"
+    AUTH_TOKEN = ""
     # The AUTH_TOKEN is the one generate within the GOCD server
     # (Not GitHub)
 
