@@ -9,7 +9,7 @@ ARGS=
 all: clean build
 
 daemon:
-	docker stack deploy --compose-file docker-compose.yml $(SERVICE_NAME) $(ARGS)
+	docker stack deploy -c <(docker-compose config) $(SERVICE_NAME) $(ARGS)
 
 down:
 	docker stack rm $(SERVICE_NAME) $(ARGS)
