@@ -7,6 +7,9 @@ services:
       dockerfile: Dockerfile
       # IMPORTANT: pass all ARGs used in Dockerfile here to allow optional override from .env file
       args:
+        UID: ${UID}
+        GID: ${GID}
+        GROUP: ${GROUP}
         PLUGIN_SWARM_MAJOR_VERSION: ${PLUGIN_SWARM_MAJOR_VERSION}
         PLUGIN_SWARM_MINOR_VERSION: ${PLUGIN_SWARM_MINOR_VERSION}
         PLUGIN_SWARM_VERSION: ${PLUGIN_SWARM_MAJOR_VERSION}-${PLUGIN_SWARM_MINOR_VERSION}
@@ -29,6 +32,7 @@ services:
       - 8153:8153
     env_file:
       - .env
+    user: "${UID}:${GID}"
 
 volumes:
   godata:
