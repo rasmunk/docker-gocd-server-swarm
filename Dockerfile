@@ -4,10 +4,6 @@ LABEL MAINTAINER="Rasmus Munk <rasmus.munk@nbi.ku.dk>"
 
 # Default User and Group
 ENV USER=go
-ENV GROUP=go
-
-ARG UID
-ARG GID
 
 # Integrated plugin settings
 ARG PLUGIN_SWARM_MAJOR_VERSION
@@ -31,14 +27,10 @@ USER root
 # Ensure that the timezone is automatically picked up
 RUN apk add tzdata
 
-# Add the USER and GROUP
-RUN addgroup -g ${GID} ${GROUP} && \
-    adduser ${USER} ${GROUP}
-
 # Create the secrets file and set permissions
 RUN mkdir -p ${GO_SECRET_DIR} && \
     touch ${GO_SECRET_FILE} && \
-    chown -R ${USER}:${GROUP} ${GO_SECRET_DIR} && \
+    chown -R ${USER}:root ${GO_SECRET_DIR} && \
     chmod -R 740 ${GO_SECRET_DIR}
 
 USER ${USER}
