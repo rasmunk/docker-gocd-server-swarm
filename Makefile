@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 OWNER=ucphhpc
 IMAGE=gocd-server-swarm
 BUILD_TAG=edge

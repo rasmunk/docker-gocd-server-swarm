@@ -12,7 +12,7 @@ from defaults import (
     ACCEPT_HEADER_1,
     ACCEPT_HEADER_2,
     ACCEPT_HEADER_3,
-    ACCEPT_HEADER_4
+    ACCEPT_HEADER_4,
 )
 from config import load_config
 
@@ -29,8 +29,10 @@ API_URL = "{}/api".format(GO_URL)
 AUTH_URL = "{}/current_user".format(API_URL)
 ELASTIC_AGENT_URL = "{}/elastic/profiles".format(API_URL)
 ADMIN_URL = "{}/admin".format(API_URL)
+SECURITY_URL = "{}/security".format(ADMIN_URL)
 
 # Restricted URLs
+AUTHORIZATION_CONFIG_URL = "{}/auth_configs".format(SECURITY_URL)
 CLUSTER_PROFILES_URL = "{}/elastic/cluster_profiles".format(ADMIN_URL)
 CONFIG_REPO_URL = "{}/config_repos".format(ADMIN_URL)
 SECRET_CONFIG_URL = "{}/secret_configs".format(ADMIN_URL)
@@ -42,7 +44,11 @@ else:
     # The AUTH_TOKEN is the one generate within the GOCD server
     # (Not GitHub)
 
-AUTHORIZATION_HEADER = {"Authorization": "bearer {}".format(AUTH_TOKEN), **ACCEPT_HEADER_1}
+AUTHORIZATION_HEADER = {
+    "Authorization": "bearer {}".format(AUTH_TOKEN),
+    **ACCEPT_HEADER_1,
+}
+
 
 def get(session, url, *args, **kwargs):
     try:
@@ -74,9 +80,14 @@ def get_types(session, base_url, headers=None):
         return resp.text
     return None
 
+
 def create_type(session, url, data=None, headers=None):
     json_data = json.dumps(data)
-    return post(session, url, data=json_data, headers=headers).text
+    created = post(session, url, data=json_data, headers=headers)
+    if created.status_code == 200:
+        return True
+    print("Failed to create type: {}".format(created.text))
+    return False
 
 
 def authenticate(session):
@@ -84,85 +95,6 @@ def authenticate(session):
     if resp.status_code == 200:
         return True
     return False
-
-def get_cluster_profiles(session, headers=None):
-    if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v1+json"}
-    return get(session, CLUSTER_PROFILES_URL, headers=headers).text
-
-
-def get_cluster(session, id, headers=None):
-    if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v1+json"}
-    id_url = "{}/{}".format(CLUSTER_PROFILES_URL, id)
-    resp = get(session, id_url, headers=headers)
-    if resp.status_code == 200:
-        return resp.text
-    return None
-
-
-def create_cluster_profile(session, data=None, headers=None):
-    if not headers:
-        headers = {
-            "Accept": "application/vnd.go.cd.v1+json",
-            "Content-Type": CONTENT_TYPE,
-        }
-    if not data:
-        data = {}
-    json_data = json.dumps(data)
-    return post(session, CLUSTER_PROFILES_URL, data=json_data, headers=headers).text
-
-
-def get_elastic_agent_profiles(session, headers=None):
-    if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v2+json"}
-    return get(session, ELASTIC_AGENT_URL, headers=headers).text
-
-
-def get_elastic_agent(session, id, headers=None):
-    if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v2+json"}
-    id_url = "{}/{}".format(ELASTIC_AGENT_URL, id)
-    resp = get(session, id_url, headers=headers)
-    if resp.status_code == 200:
-        return resp.text
-    return None
-
-
-def create_elastic_agent_profile(session, data=None, headers=None):
-    if not headers:
-        headers = {
-            "Accept": "application/vnd.go.cd.v2+json",
-            "Content-Type": CONTENT_TYPE,
-        }
-    if not data:
-        data = {}
-    json_data = json.dumps(data)
-    return post(session, ELASTIC_AGENT_URL, data=json_data, headers=headers).text
-
-
-def get_config_repo(session, id, headers=None):
-    if not headers:
-        headers = {"Accept": "application/vnd.go.cd.v4+json"}
-    id_url = "{}/{}".format(CONFIG_REPO_URL, id)
-    resp = get(session, id_url, headers=headers)
-    if resp.status_code == 200:
-        return resp.text
-    return None
-
-
-def create_config_repo(session, config_id=None, data=None, headers=None, extra_config_kwargs=None):
-    if not headers:
-        headers = {
-            "Accept": "application/vnd.go.cd.v4+json",
-            "Content-Type": CONTENT_TYPE,
-        }
-    if not data:
-        data = {}
-
-    request_data = {"id": config_id, **data}
-    json_data = json.dumps(request_data)
-    return post(session, CONFIG_REPO_URL, data=json_data, headers=headers).text
 
 
 def is_auth_repo(repository_config):
@@ -175,10 +107,11 @@ def is_auth_repo(repository_config):
     return True
 
 
-def extract_auth_data(repository_config):
+def repo_auth_data(repository_config):
     return repository_config["authentication"]
 
-def get_secret(auth_data):
+
+def get_repo_secret(auth_data):
     if "secret" not in auth_data:
         return False
     return auth_data["secret"]
@@ -187,36 +120,24 @@ def get_secret(auth_data):
 def get_repo_secret_manager(repository_config):
     return repository_config["authentication"]["secret_plugin"]
 
-
-def get_secret_configs(session, headers=None):
-    if not headers:
-        headers = ACCEPT_HEADER_3
-    return get(session, SECRET_CONFIG_URL)
-
-
-def create_secret_config(session, data=None, headers=None):
-    if not headers:
-        headers = ACCEPT_HEADER_3
-    if not data:
-        data = {}
-    json_data = json.dumps(data)
-    return post(session, SECRET_CONFIG_URL, data=json_data, headers=headers).text
+def get_secret_manager(session, id):
+    return get_type(session, SECRET_CONFIG_URL, id, headers=ACCEPT_HEADER_3)
 
 
 if __name__ == "__main__":
-    cluster_profiles_config = load_config(path=cluster_profiles_path)
-    elastic_agent_config = load_config(path=elastic_agent_profile_path)
-    repositories_config = load_config(path=repositories_path)
+    cluster_profiles_configs = load_config(path=cluster_profiles_path)
+    elastic_agent_configs = load_config(path=elastic_agent_profile_path)
+    repositories_configs = load_config(path=repositories_path)
     # TODO, load and create the authorization config
-    authorization_config = load_config(path=authorization_config_path)
-    secret_managers_config = load_config(path=secret_managers_config_path)
+    authorization_configs = load_config(path=authorization_config_path)
+    secret_managers_configs = load_config(path=secret_managers_config_path)
 
     configs = [
-        {"path": cluster_profiles_path, "config": cluster_profiles_config},
-        {"path": elastic_agent_profile_path, "config": elastic_agent_config},
-        {"path": repositories_path, "config": repositories_config},
-        {"path": secret_managers_config_path, "config": secret_managers_config},
-        {"path": authorization_config_path, "config": authorization_config}
+        {"path": cluster_profiles_path, "config": cluster_profiles_configs},
+        {"path": elastic_agent_profile_path, "config": elastic_agent_configs},
+        {"path": repositories_path, "config": repositories_configs},
+        {"path": secret_managers_config_path, "config": secret_managers_configs},
+        {"path": authorization_config_path, "config": authorization_configs},
     ]
 
     for config in configs:
@@ -230,74 +151,122 @@ if __name__ == "__main__":
         if not authed:
             exit(2)
 
-#        print("Setup Authorization config")
-
+        print("Setup Authorization config")
+        for auth_config in authorization_configs:
+            exists = get_type(
+                session,
+                AUTHORIZATION_CONFIG_URL,
+                auth_config["id"],
+                headers=ACCEPT_HEADER_2,
+            )
+            if not exists:
+                created = create_type(
+                    session,
+                    AUTHORIZATION_CONFIG_URL,
+                    data=auth_config,
+                    headers=ACCEPT_HEADER_2,
+                )
+                if not created:
+                    print(
+                        "Failed to create authorization config: {}".format(auth_config)
+                    )
+                    exit(4)
 
         print("Setup Secret Manager")
-        for secret_manager_config in secret_managers_config:
-            exists = get_type(session, SECRET_CONFIG_URL, secret_manager_config["id"], headers=ACCEPT_HEADER_4)
-#            exists = get_secret_config(session, secret_manager_config["id"])
+        for secret_manager_config in secret_managers_configs:
+            exists = get_type(
+                session,
+                SECRET_CONFIG_URL,
+                secret_manager_config["id"],
+                headers=ACCEPT_HEADER_3,
+            )
             if not exists:
-                created = create_type(session, SECRET_CONFIG_URL, data=secret_manager_config, headers=ACCEPT_HEADER_3)
-                # created = create_secret_config(session, data=secret_manager_config)
+                created = create_type(
+                    session,
+                    SECRET_CONFIG_URL,
+                    data=secret_manager_config,
+                    headers=ACCEPT_HEADER_3,
+                )
                 if not created:
-                    print("Failed to create secret config: {}".format(
-                        secret_manager_config
-                    ))
-                    exit(3)
+                    print(
+                        "Failed to create secret config: {}".format(
+                            secret_manager_config
+                        )
+                    )
+                    exit(5)
 
         print("Setup Cluster profiles")
         # Create cluster profile
-        #existing_cluster = get_cluster(session, cluster_profiles_config["id"])
-        existing_cluster = get_type(session, CLUSTER_PROFILES_URL, cluster_profiles_config["id"], headers=ACCEPT_HEADER_1)
-        if not existing_cluster:
-            #created = create_cluster_profile(session, data=cluster_profiles_config)
-            created = create_type(session, CLUSTER_PROFILES_URL, data=cluster_profiles_config, headers=ACCEPT_HEADER_1)
-            if not created:
-                print(
-                    "Failed to create cluster profile: {}".format(
-                        cluster_profiles_config
-                    )
+        for cluster_config in cluster_profiles_configs:
+            existing_cluster = get_type(
+                session,
+                CLUSTER_PROFILES_URL,
+                cluster_config["id"],
+                headers=ACCEPT_HEADER_1,
+            )
+            if not existing_cluster:
+                created = create_type(
+                    session,
+                    CLUSTER_PROFILES_URL,
+                    data=cluster_config,
+                    headers=ACCEPT_HEADER_1,
                 )
-                exit(4)
+                if not created:
+                    print("Failed to create cluster profile: {}".format(cluster_config))
+                    exit(6)
 
-        #existing_agent = get_elastic_agent(session, elastic_agent_config["id"])
-        existing_agent = get_type(session, ELASTIC_AGENT_URL, elastic_agent_config["id"], headers=ACCEPT_HEADER_2)
-        if not existing_agent:
-            #created = create_elastic_agent_profile(session, data=elastic_agent_config)
-            created = create_type(session, ELASTIC_AGENT_URL, data=elastic_agent_config, headers=ACCEPT_HEADER_2)
-            if not created:
-                print("Failed to create elastic agent profile: {}".format(created))
-                exit(5)
+        for agent_config in elastic_agent_configs:
+            existing_agent = get_type(
+                session, ELASTIC_AGENT_URL, agent_config["id"], headers=ACCEPT_HEADER_2
+            )
+            if not existing_agent:
+                created = create_type(
+                    session,
+                    ELASTIC_AGENT_URL,
+                    data=agent_config,
+                    headers=ACCEPT_HEADER_2,
+                )
+                if not created:
+                    print("Failed to create elastic agent profile: {}".format(created))
+                    exit(7)
 
         print("Create Config Repositories")
-        for repository_config in repositories_config:
-            #existing_repo = get_config_repo(session, repository_config["id"])
-            existing_repo = get_type(session, CONFIG_REPO_URL, repository_config["id"], headers=ACCEPT_HEADER_4)
+        for repository_config in repositories_configs:
+            existing_repo = get_type(
+                session,
+                CONFIG_REPO_URL,
+                repository_config["id"],
+                headers=ACCEPT_HEADER_4,
+            )
             if not existing_repo:
                 # Check whether a secret auth token is required
                 extra_config_kwargs = {}
                 if is_auth_repo(repository_config):
-                    auth_data = extract_auth_data(repository_config)
-                    secret_manager = get_secret_manager(repository_config)
-                    secret = get_secret(auth_data)
-                    if not secret:
-                        #created = create_secret(repository_config)
-                        created = create_secret(repository_config)
-                        if not created:
-                            print("Failed to create new secret")
-                        extra_config_kwargs["secret"] = created
+                    repo_auth_data = repo_auth_data(repository_config)
+                    repo_secret_manager = get_repo_secret_manager(repository_config)
+                    secret = get_repo_secret(repo_auth_data)
 
-                created = create_config_repo(
+                    secret_manager = get_secret_manager(session, repo_secret_manager)
+                    if not secret_manager:
+                        print(
+                            "Repo: {} tries to use secret manager: {} which doesn't exist".format(
+                                repository_config["id"], repo_secret_manager
+                            )
+                        )
+                    # secret = get_type(session, SECRET_CONFIG_URL)
+
+                    # if not secret:
+                    # created = create_secret(repository_config)
+                    #    created = create_secret(repository_config)
+                    #    if not created:
+                    #        print("Failed to create new secret")
+                    #    extra_config_kwargs["secret"] = created
+                created = create_type(
                     session,
-                    config_id=repository_config["id"],
-                    data=repository_config["config"],
-                    extra_config_kwargs=extra_config_kwargs,
+                    CONFIG_REPO_URL,
+                    data={"id": repository_config["id"], **repository_config["config"]},
+                    headers=ACCEPT_HEADER_4,
                 )
                 if not created:
-                    print("Failed to create elastic agent profile: {}".format(created))
+                    print("Failed to create repository config: {}".format(created))
                     exit(1)
-                print(created)
-
-        # Associate GitHub token with the specified repo
-        print("Setup SSH keys for private checkouts")
