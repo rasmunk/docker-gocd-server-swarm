@@ -20,10 +20,15 @@ ARG PLUGIN_GITHUB_VERSION
 ARG GITHUB_JAR_NAME
 
 ARG GO_DATA_DIR
+ARG GO_PLUGINS_EXTERNAL_DIR
+ARG GO_PLUGINS_BUNDLED_DIR
 
 # Default secret file db
 ARG GO_SECRET_DIR
 ARG GO_SECRET_FILE
+
+# Update PATH to make java available on the path
+ENV PATH="${PATH}:/gocd-jre/bin"
 
 USER root
 
@@ -36,9 +41,8 @@ RUN addgroup -g ${GID} ${GROUP} && \
     adduser ${USER} wheel && \
     adduser ${USER} root
 
-# Create the secrets file and set permissions
+# Create the secrets dir and set permissions
 RUN mkdir -p ${GO_SECRET_DIR} && \
-    touch ${GO_SECRET_FILE} && \
     chown -R ${USER}:${GROUP} ${GO_SECRET_DIR} && \
     chmod -R 740 ${GO_SECRET_DIR}
 
@@ -51,7 +55,10 @@ RUN wget "https://github.com/gocd-contrib/docker-swarm-elastic-agent-plugin/rele
 RUN wget "https://github.com/gocd-contrib/github-oauth-authorization-plugin/releases/download/v${PLUGIN_GITHUB_VERSION}/${GITHUB_JAR_NAME}" -P /tmp/
 
 # Create the required diectories
-RUN mkdir -p ${GO_DATA_DIR}/plugins/external
+RUN mkdir -p ${GO_PLUGINS_EXTERNAL_DIR} ${GO_PLUGINS_BUNDLED_DIR}}
 # Move the jars into the plugin directory
-RUN mv /tmp/${SWARM_JAR_NAME} ${GO_DATA_DIR}/plugins/external/
-RUN mv /tmp/${GITHUB_JAR_NAME} ${GO_DATA_DIR}/plugins/external/
+RUN mv /tmp/${SWARM_JAR_NAME} ${GO_PLUGINS_EXTERNAL_DIR}/
+RUN mv /tmp/${GITHUB_JAR_NAME} ${GO_PLUGINS_EXTERNAL_DIR}/
+
+# Ensure that the plugins are available in the path
+ENV PATH="${PATH}:${GO_PLUGINS_EXTERNAL_DIR}:${GO_PLUGINS_BUNDLED_DIR}"
