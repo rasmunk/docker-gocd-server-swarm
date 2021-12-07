@@ -5,12 +5,8 @@ from utils import makedirs, write, load, remove
 
 
 def get_config_path(path=None):
-    if "MULTIPLE_SPAWNER_CONFIG_FILE" in os.environ:
-        path = os.environ["MULTIPLE_SPAWNER_CONFIG_FILE"]
-    else:
-        # If no path is set programmatically
-        if not path:
-            path = os.path.join(default_base_path, "config")
+    if not path:
+        path = os.path.join(default_base_path, "config")
     return path
 
 

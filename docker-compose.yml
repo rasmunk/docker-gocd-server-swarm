@@ -22,11 +22,11 @@ services:
         GO_PLUGINS_BUNDLED_DIR: ${GO_PLUGINS_BUNDLED_DIR}
         GO_PLUGINS_EXTERNAL_DIR: ${GO_PLUGINS_EXTERNAL_DIR}
         GO_SECRET_DIR: ${GO_SECRET_DIR}
-        GO_SECRET_FILE: ${GO_SECRET_FILE}
     image: ucphhpc/gocd-server-swarm:${BUILD_TAG}
     networks:
       - nginx_default
     volumes:
+      - ./docker-entrypoint.d:/docker-entrypoint.d:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - godata:/godata:rw
       - gosecrets:/gosecrets:rw
