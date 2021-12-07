@@ -8,7 +8,6 @@ from defaults import (
     elastic_agent_profile_path,
     repositories_path,
     secret_managers_config_path,
-    JSON_HEADER,
     ACCEPT_HEADER_1,
     ACCEPT_HEADER_2,
     ACCEPT_HEADER_3,
@@ -125,6 +124,7 @@ def get_secret_configs(session, headers=None):
     if not headers:
         headers = ACCEPT_HEADER_3
     return get(session, SECRET_CONFIG_URL)
+
 
 def get_secret_manager(session, id):
     return get_type(session, SECRET_CONFIG_URL, id, headers=ACCEPT_HEADER_3)
