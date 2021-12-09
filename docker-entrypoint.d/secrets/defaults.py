@@ -1,3 +1,5 @@
+PACKAGE_NAME = "gocd-setup-secrets"
+
 # ENV variables
 GO_PLUGINS_BUNDLED_DIR = "GO_PLUGINS_BUNDLED_DIR"
 GO_SECRET_DIR = "GO_SECRET_DIR"

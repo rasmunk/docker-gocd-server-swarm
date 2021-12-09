@@ -1,11 +1,51 @@
 #!/usr/bin/python3
+import argparse
 import os
-from secrets.defaults import GO_SECRET_DIR, GO_PLUGINS_BUNDLED_DIR, GOCD_SECRET_PLUGIN
+import json
+from secrets.defaults import (
+    GO_SECRET_DIR,
+    GO_PLUGINS_BUNDLED_DIR,
+    GOCD_SECRET_PLUGIN,
+    PACKAGE_NAME,
+)
 from secrets.config import load_config
-from secrets.utils import path_exists, is_env_set, process
+from secrets.utils import path_exists, is_env_set, process, eprint
+
+
+def add_cleanup_input(parser):
+    cleanup_group = parser.add_argument_group(title="Cleanup arguments")
+    cleanup_group.add_argument("--remove-input-secretdb", type=bool, default=False)
+
+
+def run_cli():
+    parser = argparse.ArgumentParser(prog=PACKAGE_NAME)
+    commands = parser.add_subparsers("COMMAND")
+    cleanup_parser = commands.add_parser("cleanup")
+    add_cleanup_input(cleanup_parser)
+
+    args = parser.parse_args()
+    if hasattr(args, "func"):
+        success, response = args.func(args)
+        output = ""
+        if success:
+            response["status"] = "success"
+        else:
+            response["status"] = "failed"
+
+        try:
+            output = json.dumps(response, indent=4, sort_keys=True, default=to_str)
+        except Exception as err:
+            eprint("Failed to format: {}, err: {}".format(output, err))
+        if success:
+            print(output)
+        else:
+            eprint(output)
+    return None
 
 
 if __name__ == "__main__":
+    run = run_cli()
+
     bundled_plugin_path = os.environ[GO_PLUGINS_BUNDLED_DIR]
     if not is_env_set(GO_PLUGINS_BUNDLED_DIR, bundled_plugin_path):
         exit(1)
@@ -56,3 +96,5 @@ if __name__ == "__main__":
             execute_kwargs = {"commands": [add_secret_cmd], "capture": True}
             result = process(execute_kwargs=execute_kwargs)
             print("Result: {}".format(result))
+
+    # TODO, have an optional flag for deleting the secret input db after setup

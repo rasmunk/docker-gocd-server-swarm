@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import inspect
 
@@ -60,3 +61,7 @@ def process(execute_kwargs=None):
             command_results.update({"output": str(getattr(result, "stdout"))})
         output_results.append(command_results)
     return output_results
+
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
