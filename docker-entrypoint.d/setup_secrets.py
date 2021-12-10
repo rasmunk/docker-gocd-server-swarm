@@ -7,9 +7,12 @@ from secrets.defaults import (
     GO_PLUGINS_BUNDLED_DIR,
     GOCD_SECRET_PLUGIN,
     PACKAGE_NAME,
+    get_secrets_dir_path,
+    get_secrets_db_path,
 )
 from secrets.config import load_config
-from secrets.utils import path_exists, is_env_set, process, eprint
+from secrets.io import remove, makedirs, exists
+from secrets.utils import path_exists, is_env_set, process, eprint, to_str
 
 
 def add_cleanup_input(parser):
@@ -17,11 +20,13 @@ def add_cleanup_input(parser):
     cleanup_group.add_argument("--remove-input-secretdb", type=bool, default=False)
 
 
+
 def run_cli():
     parser = argparse.ArgumentParser(prog=PACKAGE_NAME)
     commands = parser.add_subparsers("COMMAND")
     cleanup_parser = commands.add_parser("cleanup")
     add_cleanup_input(cleanup_parser)
+    cleanup_parser.set_defaults(func=cleanup_secrets_db)
 
     args = parser.parse_args()
     if hasattr(args, "func"):
@@ -41,6 +46,55 @@ def run_cli():
         else:
             eprint(output)
     return None
+
+
+def init_secrets_dir():
+    response = {}
+    secrets_dir_path, msg = get_secrets_dir_path()
+    if not secret_dir_path:
+        response["msg"] = msg
+        return False, response
+
+    if not exists(secrets_dir_path):
+        # Ensure the secrets dir is there
+        created, msg = makedirs(secrets_dir_path)
+        response["msg"] = msg
+        if not created:
+            return False, response
+        return True, response
+
+    response["msg"] = "The secrets db directory already exists: {}".format(
+        secrets_dir_path
+    )
+    return True, response
+
+
+def secrets_db_exist():
+    response = {}
+    db_path, msg = get_secrets_db_path()
+    if not db_path:
+        response["msg"] = msg
+        return False, response
+    return exists(db_path), ""
+
+
+def cleanup_secrets_db():
+    response = {}
+
+    db_path, msg = get_secrets_db_path()
+    if not db_path:
+        response["msg"] = msg
+        return False, response
+
+    if not exists(db_path):
+        response["msg"] = "The db path: {} does not exist".format(db_path)
+        return True, response
+
+    removed, msg = remove(db_path)
+    response["msg"] = msg
+    if not removed:
+        return False, response
+    return True, response
 
 
 if __name__ == "__main__":

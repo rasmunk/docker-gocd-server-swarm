@@ -1,21 +1,17 @@
 import os
+import datetime
 import sys
 import subprocess
 import inspect
 
 
-def is_env_set(name, value):
+def is_env_set(name):
+    if name not in os.environ:
+        return False, "Environment variable: {} is not set".format(name)
+    value = os.environ[name]
     if not value:
-        print("The required environment variable: {} is not set".format(name))
-        return False
-    return True
-
-
-def path_exists(path):
-    if not os.path.exists(path):
-        print("The path: {} does not exist".format(path))
-        return False
-    return True
+        return False, "Environment variable: {} is set but blank".format(name)
+    return True, ""
 
 
 def process(execute_kwargs=None):
@@ -65,3 +61,8 @@ def process(execute_kwargs=None):
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
+def to_str(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
