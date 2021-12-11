@@ -3,6 +3,11 @@ from secrets.utils import is_env_set
 
 PACKAGE_NAME = "gocd-setup-secrets"
 
+
+GO_PLUGINS_BUNDLED_DIR = "/godata"
+GO_SECRET_DIR = "/gosecrets"
+GO_SECRET_DB_FILE = "{}/secrets.yml".format(GO_SECRET_DIR)
+
 # ENV variables
 GO_PLUGINS_BUNDLED_DIR = "GO_PLUGINS_BUNDLED_DIR"
 GO_SECRET_DIR = "GO_SECRET_DIR"
@@ -15,6 +20,7 @@ GOCD_SECRET_PLUGIN = "gocd-file-based-secrets-plugin.jar"
 def get_secrets_dir_path():
     dir_path, msg = is_env_set(GO_SECRET_DIR)
     if not dir_path:
+
         return False, msg
     return True, ""
 

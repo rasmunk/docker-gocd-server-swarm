@@ -5,13 +5,20 @@ import subprocess
 import inspect
 
 
+def get_env_value(name):
+    value, msg = is_env_set(name)
+    if not value:
+        return False, msg
+    return value
+
+
 def is_env_set(name):
     if name not in os.environ:
         return False, "Environment variable: {} is not set".format(name)
     value = os.environ[name]
     if not value:
         return False, "Environment variable: {} is set but blank".format(name)
-    return True, ""
+    return value, ""
 
 
 def process(execute_kwargs=None):

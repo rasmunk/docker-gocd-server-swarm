@@ -4,6 +4,7 @@ import os
 import json
 from secrets.defaults import (
     GO_SECRET_DIR,
+    GO_SECRET_DB_FILE,
     GO_PLUGINS_BUNDLED_DIR,
     GOCD_SECRET_PLUGIN,
     PACKAGE_NAME,
@@ -12,7 +13,7 @@ from secrets.defaults import (
 )
 from secrets.config import load_config
 from secrets.io import remove, makedirs, exists
-from secrets.utils import path_exists, is_env_set, process, eprint, to_str
+from secrets.utils import is_env_set, process, eprint, to_str, get_env_value
 
 
 def add_cleanup_input(parser):
@@ -20,10 +21,9 @@ def add_cleanup_input(parser):
     cleanup_group.add_argument("--remove-input-secretdb", type=bool, default=False)
 
 
-
 def run_cli():
     parser = argparse.ArgumentParser(prog=PACKAGE_NAME)
-    commands = parser.add_subparsers("COMMAND")
+    commands = parser.add_subparsers(title="COMMAND")
     cleanup_parser = commands.add_parser("cleanup")
     add_cleanup_input(cleanup_parser)
     cleanup_parser.set_defaults(func=cleanup_secrets_db)
@@ -100,31 +100,34 @@ def cleanup_secrets_db():
 if __name__ == "__main__":
     run = run_cli()
 
-    bundled_plugin_path = os.environ[GO_PLUGINS_BUNDLED_DIR]
-    if not is_env_set(GO_PLUGINS_BUNDLED_DIR, bundled_plugin_path):
+    bundled_plugin_path, msg = get_env_value(GO_PLUGINS_BUNDLED_DIR)
+    if not bundled_plugin_path:
+        print(msg)
         exit(1)
 
-    if not path_exists(bundled_plugin_path):
+    if not exists(bundled_plugin_path):
         exit(1)
 
     file_secret_plugin_path = os.path.join(bundled_plugin_path, GOCD_SECRET_PLUGIN)
-    if not path_exists(file_secret_plugin_path):
+    if not exists(file_secret_plugin_path):
         exit(1)
 
-    secret_dir_path = os.environ[GO_SECRET_DIR]
-    if not is_env_set(GO_SECRET_DIR, secret_dir_path):
+    secret_dir_path, msg = get_env_value(GO_SECRET_DIR)
+    if not secret_dir_path:
+        print(msg)
         exit(1)
 
-    if not path_exists(secret_dir_path):
+    if not exists(secret_dir_path):
         exit(1)
 
-    secrets_db_config_path = os.path.join(GO_SECRET_DIR, "secrets.yml")
-    if not path_exists(secrets_db_config_path):
+    secret_db_path, msg = get_env_value(GO_SECRET_DB_FILE)
+    if not exists(secret_db_path):
+        print(msg)
         exit(1)
 
-    secret_db = load_config(secrets_db_config_path)
+    secret_db = load_config(secret_db_path)
     if not secret_db:
-        print("Failed loading: {}".format(secrets_db_config_path))
+        print("Failed loading: {}".format(secret_db_path))
         exit(1)
 
     # Initialize the secret DBs
@@ -137,7 +140,7 @@ if __name__ == "__main__":
     base_add_secret_cmd = base_plugin_cmd + ["add", "-f"]
     for secret_db_key, secret_db in secret_db.items():
         # Create the secret db if it doesn't exist
-        if not os.path.exists(secret_db["path"]):
+        if not exists(secret_db["path"]):
             new_db_cmd = create_db_cmd + [secret_db["path"]]
             execute_kwargs = {"commands": [new_db_cmd], "capture": True}
             result = process(execute_kwargs=execute_kwargs)

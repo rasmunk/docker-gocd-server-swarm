@@ -8,6 +8,9 @@ ENV USER=go
 ARG GROUP
 ARG GID
 
+# When the ENV file is passed in
+# the docker-compose file
+# every env is set
 # Integrated plugin settings
 ARG PLUGIN_SWARM_MAJOR_VERSION
 ARG PLUGIN_SWARM_MINOR_VERSION
@@ -32,7 +35,7 @@ ENV PATH="${PATH}:/gocd-jre/bin"
 USER root
 
 # Ensure that the timezone is automatically picked up
-RUN apk add tzdata
+RUN apk add tzdata py-pip
 
 # Add an extra group an assign it to the ${USER}
 RUN addgroup -g ${GID} ${GROUP} && \
@@ -61,3 +64,6 @@ RUN mv /tmp/${GITHUB_JAR_NAME} ${GO_PLUGINS_EXTERNAL_DIR}/
 
 # Ensure that the plugins are available in the path
 ENV PATH="${PATH}:${GO_PLUGINS_EXTERNAL_DIR}:${GO_PLUGINS_BUNDLED_DIR}"
+
+# TODO, uncomment when released
+# RUN pip3 install gocd-tools
