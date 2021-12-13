@@ -48,6 +48,12 @@ RUN mkdir -p ${GO_SECRET_DIR} && \
     chown -R ${USER}:${GROUP} ${GO_SECRET_DIR} && \
     chmod -R 740 ${GO_SECRET_DIR}
 
+# TODO, change to pip install once stable
+RUN cd /tmp \
+    && git clone https://github.com/rasmunk/gocd-tools.git \
+    && cd /tmp/gocd-tools \
+    && python3 setup.py install
+
 USER ${USER}
 
 # Install the docker swarm plugin
@@ -64,6 +70,3 @@ RUN mv /tmp/${GITHUB_JAR_NAME} ${GO_PLUGINS_EXTERNAL_DIR}/
 
 # Ensure that the plugins are available in the path
 ENV PATH="${PATH}:${GO_PLUGINS_EXTERNAL_DIR}:${GO_PLUGINS_BUNDLED_DIR}"
-
-# TODO, uncomment when released
-# RUN pip3 install gocd-tools
