@@ -33,7 +33,7 @@ def format_output_json(result):
     for key, value in result.items():
         try:
             evalued = literal_eval(value)
-        except SyntaxError as err:
+        except SyntaxError:
             json_result[key] = value
             continue
 
@@ -59,10 +59,14 @@ def print_output(json_result):
             print("Error: {}".format(json_result["error"]["msg"]))
         else:
             print("Error: {}".format(json_result))
-    
-    if "status" in json_result["output"] and json_result["output"]["status"] == "success":
-        if "msg" in json_result[""] :
+
+    if (
+        "status" in json_result["output"]
+        and json_result["output"]["status"] == "success"
+    ):
+        if "msg" in json_result["output"]:
             print("Success: {}".format(json_result["output"]["msg"]))
+
 
 if __name__ == "__main__":
     print("Run gocd-tools secrets init")
