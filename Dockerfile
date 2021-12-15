@@ -52,7 +52,7 @@ RUN mkdir -p ${GO_SECRET_DIR} && \
 RUN cd /tmp \
     && git clone https://github.com/rasmunk/gocd-tools.git \
     && cd /tmp/gocd-tools \
-    && python3 setup.py install
+    && pip3 install .
 
 USER ${USER}
 
