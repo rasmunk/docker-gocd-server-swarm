@@ -22,7 +22,7 @@ if __name__ == "__main__":
     init_command = ["gocd-tools", "setup", "secrets", "init"]
     result = run_command(init_command)
 
-    init_output_json = json.dumps(result["stdout"])
+    init_output_json = json.dumps(result["output"])
     if init_output_json["status"] != "success":
         print("Failed command: {}".format(init_command))
         print(init_output_json)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     configure_command = ["gocd-tools", "setup", "secrets", "configure"]
     conf_result = run_command(configure_command)
 
-    conf_output_json = json.dumps(conf_result["stdout"])
+    conf_output_json = json.dumps(conf_result["output"])
     if conf_output_json["status"] != "success":
         print("Failed command: {}".format(configure_command))
         print(conf_output_json)
