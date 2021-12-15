@@ -31,20 +31,24 @@ def run_command(command, execute_kwargs=None):
 def format_output_json(result):
     json_result = {}
     for key, value in result.items():
-        if key != "command":
+        try:
             evalued = literal_eval(value)
-            if isinstance(evalued, bytes):
-                evalued = evalued.decode("utf-8")
-            if isinstance(evalued, str):
-                # Ensure utf-8 encoding
-                evalued = evalued.encode("utf-8")
-            if isinstance(evalued, int):
-                evalued = str(evalued)
+        except SyntaxError as err:
+            json_result[key] = value
+            continue
 
-            if len(evalued) > 0:
-                json_result[key] = json.loads(evalued)
-            else:
-                json_result[key] = value
+        if isinstance(evalued, bytes):
+            evalued = evalued.decode("utf-8")
+        if isinstance(evalued, str):
+            # Ensure utf-8 encoding
+            evalued = evalued.encode("utf-8")
+        if isinstance(evalued, int):
+            evalued = str(evalued)
+
+        if len(evalued) > 0:
+            json_result[key] = json.loads(evalued)
+        else:
+            json_result[key] = value
     return json_result
 
 
@@ -70,7 +74,7 @@ if __name__ == "__main__":
 
     print("Run gocd-tools secrets configure")
     configure_command = ["gocd-tools", "setup", "secrets", "configure"]
-    json_result = run_command(configure_command)
+    result = run_command(configure_command, execute_kwargs={"capture": True})
 
     json_result = format_output_json(result)
     print_output(json_result)
