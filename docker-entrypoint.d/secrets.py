@@ -63,6 +63,6 @@ if __name__ == "__main__":
     conf_result = run_command(configure_command)
 
     conf_output_json = format_output_json(conf_result)
-    if len(json_result["error"]) > 0:
-        print("Failed command: {}".format(init_command))
-        print(json_result["error"]["msg"])
+    if len(conf_output_json["error"]) > 0:
+        print("Failed command: {}".format(configure_command))
+        print(conf_output_json["error"]["msg"])
