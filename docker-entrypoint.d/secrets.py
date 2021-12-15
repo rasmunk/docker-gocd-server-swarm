@@ -48,27 +48,29 @@ def format_output_json(result):
     return json_result
 
 
+def print_output(json_result):
+    print("Result of: {}".format(json_result["command"]))
+    if "status" in json_result["error"] and json_result["error"]["status"] == "failed":
+        if "msg" in json_result["error"]:
+            print("Error: {}".format(json_result["error"]["msg"]))
+        else:
+            print("Error: {}".format(json_result))
+    
+    if "status" in json_result["output"] and json_result["output"]["status"] == "success":
+        if "msg" in json_result[""] :
+            print("Success: {}".format(json_result["output"]["msg"]))
+
 if __name__ == "__main__":
     print("Run gocd-tools secrets init")
     init_command = ["gocd-tools", "setup", "secrets", "init"]
     result = run_command(init_command, execute_kwargs={"capture": True})
 
     json_result = format_output_json(result)
-    if "status" in json_result["error"] and json_result["error"]["status"] == "failed":
-        print("Failed command: {}".format(init_command))
-        if "msg" in json_result["error"]:
-            print(json_result["error"]["smsg"])
-        else:
-            print(json_result)
+    print_output(json_result)
 
     print("Run gocd-tools secrets configure")
     configure_command = ["gocd-tools", "setup", "secrets", "configure"]
     json_result = run_command(configure_command)
 
     json_result = format_output_json(result)
-    if "status" in json_result["error"] and json_result["error"]["status"] == "failed":
-        print("Failed command: {}".format(init_command))
-        if "msg" in json_result["error"]:
-            print(json_result["error"]["smsg"])
-        else:
-            print(json_result)
+    print_output(json_result)
