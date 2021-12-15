@@ -54,15 +54,21 @@ if __name__ == "__main__":
     result = run_command(init_command, execute_kwargs={"capture": True})
 
     json_result = format_output_json(result)
-    if len(json_result["error"]) > 0:
+    if "status" in json_result["error"] and json_result["error"]["status"] == "failed":
         print("Failed command: {}".format(init_command))
-        print(json_result["error"]["msg"])
+        if "msg" in json_result["error"]:
+            print(json_result["error"]["smsg"])
+        else:
+            print(json_result)
 
     print("Run gocd-tools secrets configure")
     configure_command = ["gocd-tools", "setup", "secrets", "configure"]
-    conf_result = run_command(configure_command)
+    json_result = run_command(configure_command)
 
-    conf_output_json = format_output_json(conf_result)
-    if len(conf_output_json["error"]) > 0:
-        print("Failed command: {}".format(configure_command))
-        print(conf_output_json["error"]["msg"])
+    json_result = format_output_json(result)
+    if "status" in json_result["error"] and json_result["error"]["status"] == "failed":
+        print("Failed command: {}".format(init_command))
+        if "msg" in json_result["error"]:
+            print(json_result["error"]["smsg"])
+        else:
+            print(json_result)
