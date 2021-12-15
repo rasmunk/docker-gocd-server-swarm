@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-import argparse
 import os
 import json
 from secrets.defaults import (

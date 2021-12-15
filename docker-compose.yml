@@ -29,8 +29,7 @@ services:
       - ./docker-entrypoint.d:/docker-entrypoint.d:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - godata:/godata:rw
-      # Secrets are stored in the regular host FS, and mapped into the container
-      - ${GO_SECRET_DIR}:${GO_SECRET_DIR}:rw
+      - gosecrets:/gosecrets:rw
     ports:
       - 8153:8153
     env_file:
@@ -39,6 +38,7 @@ services:
 
 volumes:
   godata:
+  gosecrets:
 
 networks:
   nginx_default:
