@@ -17,10 +17,15 @@ ARG PLUGIN_SWARM_MINOR_VERSION
 ARG PLUGIN_SWARM_VERSION
 ARG SWARM_JAR_NAME
 
+# GitHub Authentication plugin
 ARG PLUGIN_GITHUB_MAJOR_VERSION
 ARG PLUGIN_GITHUB_MINOR_VERSION
 ARG PLUGIN_GITHUB_VERSION
 ARG GITHUB_JAR_NAME
+
+# File Secrets plugin
+ARG PLUGIN_FILE_SECRET_VERSION
+ARG FILE_SECRET_JAR_NAME
 
 ARG GO_DATA_DIR
 ARG GO_PLUGINS_EXTERNAL_DIR
@@ -62,11 +67,18 @@ RUN wget "https://github.com/gocd-contrib/docker-swarm-elastic-agent-plugin/rele
 # Install the GitHub auth plugin
 RUN wget "https://github.com/gocd-contrib/github-oauth-authorization-plugin/releases/download/v${PLUGIN_GITHUB_VERSION}/${GITHUB_JAR_NAME}" -P /tmp/
 
+# Install the File secret plugin
+RUN wget "https://github.com/gocd/gocd-file-based-secrets-plugin/releases/download/v${PLUGIN_FILE_SECRET_VERSION}/${FILE_SECRET_JAR_NAME}" -P /tmp/
+
 # Create the required diectories
 RUN mkdir -p ${GO_PLUGINS_EXTERNAL_DIR} ${GO_PLUGINS_BUNDLED_DIR}
 # Move the jars into the plugin directory
 RUN mv /tmp/${SWARM_JAR_NAME} ${GO_PLUGINS_EXTERNAL_DIR}/
 RUN mv /tmp/${GITHUB_JAR_NAME} ${GO_PLUGINS_EXTERNAL_DIR}/
+# Ensure that the file secret plugin is available on the first launch
+# even though it will be generated as part of the default bundled
+# This makes it available for usage in the docker-entrypoint.d scripts
+RUN mv /tmp/${FILE_SECRET_JAR_NAME} ${GO_PLUGINS_BUNDLED_DIR}/
 
 # Ensure that the plugins are available in the path
 ENV PATH="${PATH}:${GO_PLUGINS_EXTERNAL_DIR}:${GO_PLUGINS_BUNDLED_DIR}"
