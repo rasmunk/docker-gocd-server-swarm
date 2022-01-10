@@ -1,0 +1,14 @@
+environments:
+  ucphpc:
+    pipelines:
+      - gocd-server
+pipelines:
+  gocd-server:
+    group: ucphpc
+    locking: off
+    materials:
+      gocdserver_git:  # this is the name of material
+        # says about type of material and url at once
+        git: https://github.com/rasmunk/docker-gocd-server-swarm.git
+        branch: main
+    template: docker_image
