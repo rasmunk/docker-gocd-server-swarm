@@ -1,5 +1,9 @@
 environments:
-  ucphpc:
+  ucphhpc:
+    environment_variables:
+      DOCKERHUB_PASSWORD: '{{SECRET:[dockerhub][password]}}'
+      DOCKERHUB_USERNAME: '{{SECRET:[dockerhub][username]}}'
+      RELEASE: latest
     pipelines:
       - gocd-server
 pipelines:
@@ -12,5 +16,5 @@ pipelines:
         git: https://github.com/rasmunk/docker-gocd-server-swarm.git
         branch: main
     parameters:
-      NOTEBOOK: docker-gocd-server-swarm
+      IMAGE: docker-gocd-server-swarm
     template: docker_image
