@@ -7,7 +7,7 @@ environments:
       - gocd-server
 pipelines:
   gocd-server:
-    group: ucphpc
+    group: ucphhpc
     locking: off
     materials:
       gocdserver_git:  # this is the name of material
