@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 OWNER=ucphhpc
 IMAGE=gocd-server-swarm
-BUILD_TAG=edge
+TAG=edge
 SERVICE_NAME=gocd
 ARGS=
 
@@ -24,7 +24,7 @@ dockerclean:
 	docker volume prune -f
 
 clean:
-	docker rmi -f $(OWNER)/$(IMAGE):$(BUILD_TAG) $(ARGS)
+	docker rmi -f $(OWNER)/$(IMAGE):$(TAG) $(ARGS)
 
 push:
-	docker push ${OWNER}/${IMAGE}:${BUILD_TAG} $(ARGS)
+	docker push ${OWNER}/${IMAGE}:${TAG} $(ARGS)
