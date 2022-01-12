@@ -27,6 +27,9 @@ services:
     image: ucphhpc/gocd-server-swarm:${BUILD_TAG}
     networks:
       - nginx_default
+    deploy:
+      placement:
+        constraints: [node.role == manager]
     volumes:
       - ./docker-entrypoint.d:/docker-entrypoint.d:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
