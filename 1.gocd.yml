@@ -13,6 +13,7 @@ pipelines:
         branch: main
     parameters:
       IMAGE: docker-gocd-server-swarm
-      IMAGE_TAG: "${GO_REVISION_GOCDSERVER_GIT}"
+      COMMIT_TAG: "${GO_REVISION_GOCDSERVER_GIT}"
       DEFAULT_TAG: latest
+      ARGS: ''
     template: docker_image
