@@ -7,7 +7,13 @@ ARGS=
 
 .PHONY: build
 
-all: clean build
+all: clean init build
+
+# Link to the original defaults.env if none other is setup
+init:
+ifeq (,$(wildcard ./.env))
+	ln -s defaults.env .env
+endif
 
 daemon:
 	docker stack deploy -c <(docker-compose config) $(SERVICE_NAME) $(ARGS)

@@ -1,19 +1,34 @@
 environments:
   gocd_images:
+    environments:
+      GIT_USER: "{{SECRET:[github][username]}}"
     pipelines:
-      - gocd-server
+      - gocd-server-swarm
 pipelines:
-  gocd-server:
+  gocd-server-swarm:
     group: gocd_images
     locking: off
     materials:
-      gocdserver_git:  # this is the name of material
+      gocd_server_swarm_git:  # this is the name of material
         # says about type of material and url at once
+        name: gocd-server-swarm
         git: https://github.com/rasmunk/docker-gocd-server-swarm.git
         branch: main
+        destination: gocd-server-swarm
+      publish_docker_git:  # this is the name of material
+        # says about type of material and url at once
+        name: publish-docker-scripts
+        git: https://github.com/rasmunk/publish-docker-scripts.git
+        branch: main
+        username: ${GIT_USER}
+        password: "{{SECRET:[github][access_token]}}"
+        destination: publish-docker-scripts
     parameters:
       IMAGE: docker-gocd-server-swarm
       COMMIT_TAG: "${GO_REVISION_GOCDSERVER_GIT}"
       DEFAULT_TAG: latest
       ARGS: ''
+      SRC_DIRECTORY: gocd-server-swarm
+      TEST_DIRECTORY: gocd-server-swarm
+      PUSH_DIRECTORY: publish-docker-scripts
     template: docker_image
