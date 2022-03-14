@@ -34,3 +34,6 @@ clean:
 
 push:
 	docker push ${OWNER}/${IMAGE}:${TAG} $(ARGS)
+
+test:
+# TODO, implement tests :)
