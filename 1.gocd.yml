@@ -26,7 +26,7 @@ pipelines:
     parameters:
       IMAGE: docker-gocd-server-swarm
       ARGS: ''
-      COMMIT_TAG: "${GO_REVISION_GOCDSERVER_GIT}"
+      COMMIT_TAG: GO_REVISION_GOCDSERVER_GIT
       DEFAULT_TAG: latest
       SRC_DIRECTORY: gocd-server-swarm
       TEST_DIRECTORY: gocd-server-swarm
