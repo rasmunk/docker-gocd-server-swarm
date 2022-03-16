@@ -2,11 +2,13 @@ version: '3.7'
 
 services:
   manager:
+    image: ucphhpc/gocd-server-swarm:$TAG
     build:
       context: ./
       dockerfile: Dockerfile
       # IMPORTANT: pass all ARGs used in Dockerfile here to allow optional override from .env file
       args:
+        TAG: ${TAG}
         UID: ${UID}
         GID: ${GID}
         GROUP: ${GROUP}
@@ -24,7 +26,6 @@ services:
         GO_PLUGINS_BUNDLED_DIR: ${GO_PLUGINS_BUNDLED_DIR}
         GO_PLUGINS_EXTERNAL_DIR: ${GO_PLUGINS_EXTERNAL_DIR}
         GO_SECRET_DIR: ${GO_SECRET_DIR}
-    image: ucphhpc/gocd-server-swarm:${BUILD_TAG}
     networks:
       - nginx_default
     deploy:

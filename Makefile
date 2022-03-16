@@ -22,7 +22,7 @@ down:
 	docker stack rm $(SERVICE_NAME) $(ARGS)
 
 build:
-	docker-compose build $(ARGS)
+	docker-compose build --build-arg TAG=$(TAG) $(ARGS)
 
 dockerclean:
 	docker image prune -f
