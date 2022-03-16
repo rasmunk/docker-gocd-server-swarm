@@ -30,5 +30,5 @@ pipelines:
       DEFAULT_TAG: latest
       SRC_DIRECTORY: gocd-server-swarm
       TEST_DIRECTORY: gocd-server-swarm
-      PUSH_DIRECTORY: gocd-server-swarm
+      PUSH_DIRECTORY: publish-docker-scripts
     template: docker_image
