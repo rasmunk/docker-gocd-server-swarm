@@ -1,13 +1,14 @@
 SHELL := /bin/bash
 OWNER=ucphhpc
 IMAGE=gocd-server-swarm
-TAG=edge
 SERVICE_NAME=gocd
-ARGS=
+# Enable that the builder should use buildkit
+# https://docs.docker.com/develop/develop-images/build_enhancements/
+DOCKER_BUILDKIT=1
 
-.PHONY: build
+.PHONY: all init build push
 
-all: clean init build
+all: init build
 
 # Link to the original defaults.env if none other is setup
 init:
@@ -22,7 +23,7 @@ down:
 	docker stack rm $(SERVICE_NAME) $(ARGS)
 
 build:
-	docker-compose build --build-arg TAG=$(TAG) $(ARGS)
+	docker-compose build ${ARGS}
 
 dockerclean:
 	docker image prune -f
@@ -36,4 +37,4 @@ push:
 	docker push ${OWNER}/${IMAGE}:${TAG} $(ARGS)
 
 test:
-# TODO, implement tests :)
+# TODO, implement tests
