@@ -1,40 +1,63 @@
-SHELL := /bin/bash
+PACKAGE_NAME=gocd-server-swarm
+PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 OWNER=ucphhpc
-IMAGE=gocd-server-swarm
-SERVICE_NAME=gocd
+IMAGE=$(PACKAGE_NAME)
 # Enable that the builder should use buildkit
 # https://docs.docker.com/develop/develop-images/build_enhancements/
 DOCKER_BUILDKIT=1
+TAG=edge
+ARGS=
 
-.PHONY: all init build clean daemon dockerclean down push test
+.PHONY: all init dockerbuild dockerclean dockerpush clean dist distclean maintainer-clean
+.PHONY: install uninstall installcheck check
 
-all: init build test
+all: init dockerbuild
 
-# Link to the original defaults.env if none other is setup
 init:
-ifeq (,$(wildcard ./.env))
-	ln -s defaults.env .env
+ifeq ($(shell test -e defaults.env && echo yes), yes)
+ifneq ($(shell test -e .env && echo yes), yes)
+		ln -s defaults.env .env
+endif
 endif
 
-build:
-	docker-compose build ${ARGS}
-
-clean:
-	docker rmi -f $(OWNER)/$(IMAGE):$(TAG) $(ARGS)
-
-daemon:
-	docker stack deploy -c <(docker-compose config) $(SERVICE_NAME) $(ARGS)
+dockerbuild:
+	docker build -t $(OWNER)/$(IMAGE):$(TAG) $(ARGS) .
 
 dockerclean:
-	docker image prune -f
-	docker container prune -f
-	docker volume prune -f
+	docker rmi -f $(OWNER)/$(IMAGE):$(TAG)
 
-down:
-	docker stack rm $(SERVICE_NAME) $(ARGS)
+dockerpush:
+	docker push $(OWNER)/$(IMAGE):$(TAG)
 
-push:
-	docker push ${OWNER}/${IMAGE}:${TAG} $(ARGS)
+clean:
+	$(MAKE) dockerclean
+	$(MAKE) distclean
+	rm -fr .env
+	rm -fr .pytest_cache
+	rm -fr tests/__pycache__
 
-test:
-# TODO, implement tests
+dist:
+### PLACEHOLDER ###
+
+distclean:
+### PLACEHOLDER ###
+
+maintainer-clean:
+	@echo 'This command is intended for maintainers to use; it'
+	@echo 'deletes files that may need special tools to rebuild.'
+	$(MAKE) distclean
+
+install-dep:
+### PLACEHOLDER ###
+
+install:
+	$(MAKE) install-dep
+
+uninstall:
+### PLACEHOLDER ###
+
+installcheck:
+### PLACEHOLDER ###
+
+check:
+### PLACEHOLDER ###
