@@ -8,7 +8,7 @@ DOCKER_BUILDKIT=1
 TAG=edge
 ARGS=
 
-.PHONY: all init dockerbuild dockerclean dockerpush clean dist distclean maintainer-clean
+.PHONY: all init dockerbuild dockerclean dockerpush daemon down clean dist distclean maintainer-clean
 .PHONY: install uninstall installcheck check
 
 all: init dockerbuild
@@ -21,13 +21,19 @@ endif
 endif
 
 dockerbuild:
-	docker build -t $(OWNER)/$(IMAGE):$(TAG) $(ARGS) .
+	docker-compose build ${ARGS}
 
 dockerclean:
 	docker rmi -f $(OWNER)/$(IMAGE):$(TAG)
 
 dockerpush:
 	docker push $(OWNER)/$(IMAGE):$(TAG)
+
+daemon:
+	docker stack deploy -c <(docker-compose config) $(SERVICE_NAME) $(ARGS)
+
+down:
+	docker stack rm $(SERVICE_NAME) $(ARGS)
 
 clean:
 	$(MAKE) dockerclean
