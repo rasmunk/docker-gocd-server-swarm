@@ -1,6 +1,7 @@
 PACKAGE_NAME=gocd-server-swarm
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 OWNER=ucphhpc
+SERVICE_NAME=gocd
 IMAGE=$(PACKAGE_NAME)
 # Enable that the builder should use buildkit
 # https://docs.docker.com/develop/develop-images/build_enhancements/
