@@ -63,6 +63,9 @@ install:
 uninstall:
 ### PLACEHOLDER ###
 
+uninstallcheck:
+### PLACEHOLDER ###
+
 installcheck:
 ### PLACEHOLDER ###
 
