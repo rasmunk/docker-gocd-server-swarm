@@ -30,8 +30,9 @@ pipelines:
     parameters:
       IMAGE: docker-gocd-server-swarm
       ARGS: ''
-      COMMIT_TAG: v22.3.0
       DEFAULT_TAG: latest
+      EXTRA_TAG: v22.3.0
+      COMMIT_TAG: GO_REVISION_GOCD_SERVER_SWARM_GIT
       SRC_DIRECTORY: gocd-server-swarm
       TEST_DIRECTORY: gocd-server-swarm
       PUSH_DIRECTORY: publish-docker-scripts
