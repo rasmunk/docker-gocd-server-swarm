@@ -27,7 +27,7 @@ services:
         GO_PLUGINS_EXTERNAL_DIR: ${GO_PLUGINS_EXTERNAL_DIR}
         GO_SECRET_DIR: ${GO_SECRET_DIR}
     networks:
-      - nginx_default
+      - nginx-proxy
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -47,5 +47,5 @@ volumes:
   godata:
 
 networks:
- nginx_default:
+ nginx-proxy:
    external: true
