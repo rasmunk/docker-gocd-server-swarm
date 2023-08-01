@@ -31,7 +31,7 @@ pipelines:
       IMAGE: docker-gocd-server-swarm
       ARGS: ''
       DEFAULT_TAG: latest
-      EXTRA_TAG: v23.2.0
+      EXTRA_TAG: v23.3.0
       COMMIT_TAG: GO_REVISION_GOCD_SERVER_SWARM_GIT
       SRC_DIRECTORY: gocd-server-swarm
       TEST_DIRECTORY: gocd-server-swarm
