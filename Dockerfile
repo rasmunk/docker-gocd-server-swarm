@@ -1,4 +1,4 @@
-FROM gocd/gocd-server:v23.1.0
+FROM gocd/gocd-server:v23.2.0
 
 LABEL MAINTAINER="Rasmus Munk <rasmus.munk@nbi.ku.dk>"
 
@@ -12,6 +12,8 @@ ARG GID
 # the docker-compose file
 # every env is set
 # Integrated plugin settings
+
+# Docker Swarm Plugin
 ARG PLUGIN_SWARM_MAJOR_VERSION
 ARG PLUGIN_SWARM_MINOR_VERSION
 ARG PLUGIN_SWARM_VERSION
