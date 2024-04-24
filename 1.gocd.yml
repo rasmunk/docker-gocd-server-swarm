@@ -29,7 +29,7 @@ pipelines:
         destination: publish-docker-scripts
     parameters:
       IMAGE: docker-gocd-server-swarm
-      ARGS: ''
+      ARGS: '--no-cache'
       DEFAULT_TAG: latest
       EXTRA_TAG: v23.4.0
       COMMIT_TAG: GO_REVISION_GOCD_SERVER_SWARM_GIT
