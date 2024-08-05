@@ -4,10 +4,18 @@ PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 OWNER=ucphhpc
 SERVICE_NAME=gocd
 IMAGE=$(PACKAGE_NAME)
-DOCKER_COMPOSE=$(shell which docker-compose || echo 'docker compose')
 # Enable that the builder should use buildkit
 # https://docs.docker.com/develop/develop-images/build_enhancements/
 DOCKER_BUILDKIT=1
+# NOTE: dynamic lookup with docker as default and fallback to podman
+DOCKER=$(shell which docker || which podman)
+# if docker compose plugin is not available, try old docker-compose/podman-compose
+ifeq (, $(shell ${DOCKER} help|grep compose))
+	DOCKER_COMPOSE=$(shell which docker-compose || which podman-compose)
+else
+	DOCKER_COMPOSE=${DOCKER} compose
+endif
+$(echo ${DOCKER_COMPOSE} >/dev/null)
 TAG=edge
 ARGS=
 
