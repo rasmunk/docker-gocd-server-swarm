@@ -11,11 +11,10 @@ DOCKER_BUILDKIT=1
 TAG=edge
 ARGS=
 
-.PHONY: all init dockerbuild dockerclean dockerpush daemon down clean dist distclean maintainer-clean
-.PHONY: install uninstall installcheck check
-
+.PHONY: all
 all: init dockerbuild
 
+.PHONY: init
 init:
 ifeq ($(shell test -e defaults.env && echo yes), yes)
 ifneq ($(shell test -e .env && echo yes), yes)
@@ -23,53 +22,56 @@ ifneq ($(shell test -e .env && echo yes), yes)
 endif
 endif
 
+.PHONY: dockerbuild
 dockerbuild:
 	${DOCKER_COMPOSE} build ${ARGS}
 
+.PHONY: dockerclean
 dockerclean:
 	docker rmi -f $(OWNER)/$(IMAGE):$(TAG)
 
+.PHONY: dockerpush
 dockerpush:
 	docker push $(OWNER)/$(IMAGE):$(TAG)
 
+.PHONY: daemon
 daemon:
 	docker stack deploy -c <(${DOCKER_COMPOSE} config) $(SERVICE_NAME) $(ARGS)
 
+.PHONY: down
 down:
 	docker stack rm $(SERVICE_NAME) $(ARGS)
 
-clean:
-	$(MAKE) dockerclean
-	$(MAKE) distclean
+.PHONY: clean
+clean: distclean dockerclean
 	rm -fr .env
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
 
-dist:
-### PLACEHOLDER ###
-
-distclean:
-### PLACEHOLDER ###
-
-maintainer-clean:
+.PHONY: maintainer-clean
+maintainer-clean: clean
 	@echo 'This command is intended for maintainers to use; it'
 	@echo 'deletes files that may need special tools to rebuild.'
-	$(MAKE) distclean
 
+.PHONY: install-dep
 install-dep:
 ### PLACEHOLDER ###
 
-install:
-	$(MAKE) install-dep
+.PHONY: install
+install: install-dep
 
+.PHONY: uninstall
 uninstall:
 ### PLACEHOLDER ###
 
-uninstallcheck:
+.PHONY: uninstalltest
+uninstalltest:
 ### PLACEHOLDER ###
 
-installcheck:
+.PHONY: installtest
+installtest:
 ### PLACEHOLDER ###
 
-check:
+.PHONY: test
+test:
 ### PLACEHOLDER ###
