@@ -1,4 +1,4 @@
-FROM gocd/gocd-server:v23.4.0
+FROM gocd/gocd-server:v24.3.0
 
 LABEL MAINTAINER="Rasmus Munk <rasmus.munk@nbi.ku.dk>"
 
@@ -17,17 +17,23 @@ ARG GID
 ARG PLUGIN_SWARM_MAJOR_VERSION
 ARG PLUGIN_SWARM_MINOR_VERSION
 ARG PLUGIN_SWARM_VERSION
+ARG PLUGIN_SWARM_NAME
 ARG SWARM_JAR_NAME
+ARG SWARM_SHA256_NAME
 
 # GitHub Authentication plugin
 ARG PLUGIN_GITHUB_MAJOR_VERSION
 ARG PLUGIN_GITHUB_MINOR_VERSION
 ARG PLUGIN_GITHUB_VERSION
+ARG PLUGIN_GITHUB_NAME
 ARG GITHUB_JAR_NAME
+ARG GITHUB_SHA256_NAME
 
 # File Secrets plugin
 ARG PLUGIN_FILE_SECRET_VERSION
+ARG PLUGIN_FILE_NAME
 ARG FILE_SECRET_JAR_NAME
+ARG FILE_SECRET_SHA256_NAME
 
 ARG GO_DATA_DIR
 ARG GO_PLUGINS_EXTERNAL_DIR
@@ -42,7 +48,7 @@ ENV PATH="${PATH}:/gocd-jre/bin"
 USER root
 
 # Ensure that the timezone is automatically picked up
-RUN apk add tzdata py-pip
+RUN apk add tzdata py3-pip wget
 
 # Add an extra group an assign it to the ${USER}
 RUN addgroup -g ${GID} ${GROUP} && \
@@ -55,22 +61,32 @@ RUN mkdir -p ${GO_SECRET_DIR} && \
     chown -R ${USER}:${GROUP} ${GO_SECRET_DIR} && \
     chmod -R 740 ${GO_SECRET_DIR}
 
-# TODO, change to pip install once stable
-RUN cd /tmp \
-    && git clone https://github.com/rasmunk/gocd-tools.git \
-    && cd /tmp/gocd-tools \
-    && pip3 install .
+# Install the gocd-tools
+RUN pip3 install gocd-tools
 
 USER ${USER}
 
 # Install the docker swarm plugin
 RUN wget "https://github.com/gocd-contrib/docker-swarm-elastic-agent-plugin/releases/download/v${PLUGIN_SWARM_VERSION}/${SWARM_JAR_NAME}" -P /tmp/
+# Download the matching sha256 checksum file
+RUN wget "https://github.com/gocd-contrib/docker-swarm-elastic-agent-plugin/releases/download/v${PLUGIN_SWARM_VERSION}/${SWARM_SHA256_NAME}" -P /tmp/
+# Validate that the sha256 checksum matches the downloaded file
+RUN echo "$(cat /tmp/${SWARM_SHA256_NAME} | awk '{print $1 }') /tmp/${SWARM_JAR_NAME}" | sha256sum -c -
 
 # Install the GitHub auth plugin
 RUN wget "https://github.com/gocd-contrib/github-oauth-authorization-plugin/releases/download/v${PLUGIN_GITHUB_VERSION}/${GITHUB_JAR_NAME}" -P /tmp/
+# Download the matching sha256 checksum file
+RUN wget "https://github.com/gocd-contrib/github-oauth-authorization-plugin/releases/download/v${PLUGIN_GITHUB_VERSION}/${GITHUB_SHA256_NAME}" -P /tmp/
+# Validate that the sha256 checksum matches the downloaded file
+RUN echo "$(cat /tmp/${GITHUB_SHA256_NAME} | awk '{print $1 }') /tmp/${GITHUB_JAR_NAME}" | sha256sum -c -
 
 # Install the File secret plugin
 RUN wget "https://github.com/gocd/gocd-file-based-secrets-plugin/releases/download/v${PLUGIN_FILE_SECRET_VERSION}/${FILE_SECRET_JAR_NAME}" -P /tmp/
+# Download the matching sha256 checksum file
+RUN wget "https://github.com/gocd/gocd-file-based-secrets-plugin/releases/download/v${PLUGIN_FILE_SECRET_VERSION}/${FILE_SECRET_SHA256_NAME}" -P /tmp/
+# Validate that the sha256 checksum matches the downloaded file
+RUN echo "$(cat /tmp/${FILE_SECRET_SHA256_NAME} | awk '{print $1 }') /tmp/${FILE_SECRET_JAR_NAME}" | sha256sum -c -
+
 
 # Create the required diectories
 RUN mkdir -p ${GO_PLUGINS_EXTERNAL_DIR} ${GO_PLUGINS_BUNDLED_DIR}
