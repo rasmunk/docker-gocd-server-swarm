@@ -48,7 +48,7 @@ ENV PATH="${PATH}:/gocd-jre/bin"
 USER root
 
 # Ensure that the timezone is automatically picked up
-RUN apk add tzdata py3-pip wget
+RUN apk add tzdata python3 py3-pip wget
 
 # Add an extra group an assign it to the ${USER}
 RUN addgroup -g ${GID} ${GROUP} && \
