@@ -32,7 +32,7 @@ pipelines:
       BUILD_ARGS: '--no-cache'
       TEST_ARGS: ''
       DEFAULT_TAG: latest
-      EXTRA_TAG: v24.3.0
+      EXTRA_TAG: v24.5.0
       COMMIT_TAG: GO_REVISION_GOCD_SERVER_SWARM_GIT
       SRC_DIRECTORY: gocd-server-swarm
       TEST_DIRECTORY: gocd-server-swarm
