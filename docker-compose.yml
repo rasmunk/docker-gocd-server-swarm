@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   manager:
     image: ucphhpc/gocd-server-swarm:$TAG
