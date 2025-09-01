@@ -1,9 +1,9 @@
 SHELL:=/bin/bash
 PACKAGE_NAME=gocd-server-swarm
-PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
+PACKAGE_NAME_FORMATTED=${subst -,_,${PACKAGE_NAME}}
 OWNER=ucphhpc
 SERVICE_NAME=gocd
-IMAGE=$(PACKAGE_NAME)
+IMAGE=${PACKAGE_NAME}
 # Enable that the builder should use buildkit
 # https://docs.docker.com/develop/develop-images/build_enhancements/
 DOCKER_BUILDKIT=1
@@ -24,8 +24,8 @@ all: init dockerbuild
 
 .PHONY: init
 init:
-ifeq ($(shell test -e defaults.env && echo yes), yes)
-ifneq ($(shell test -e .env && echo yes), yes)
+ifeq {${shell test -e defaults.env && echo yes}, yes}
+ifneq {${shell test -e .env && echo yes}, yes}
 		ln -s defaults.env .env
 endif
 endif
@@ -36,19 +36,19 @@ dockerbuild:
 
 .PHONY: dockerclean
 dockerclean:
-	docker rmi -f $(OWNER)/$(IMAGE):$(TAG)
+	${DOCKER} rmi -f ${OWNER}/${IMAGE}:${TAG}
 
 .PHONY: dockerpush
 dockerpush:
-	docker push $(OWNER)/$(IMAGE):$(TAG)
+	${DOCKER} push ${OWNER}/${IMAGE}:${TAG}
 
 .PHONY: daemon
 daemon:
-	docker stack deploy -c <(${DOCKER_COMPOSE} config) $(SERVICE_NAME) $(ARGS)
+	${DOCKER} stack deploy -c docker-compose.yml ${SERVICE_NAME} ${ARGS}
 
 .PHONY: down
 down:
-	docker stack rm $(SERVICE_NAME) $(ARGS)
+	${DOCKER} stack rm ${SERVICE_NAME} ${ARGS}
 
 .PHONY: clean
 clean: distclean dockerclean
