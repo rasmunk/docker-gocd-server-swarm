@@ -24,8 +24,8 @@ all: init dockerbuild
 
 .PHONY: init
 init:
-ifeq {${shell test -e defaults.env && echo yes}, yes}
-ifneq {${shell test -e .env && echo yes}, yes}
+ifeq ($(shell test -e defaults.env && echo yes), yes)
+ifneq ($(shell test -e .env && echo yes), yes)
 		ln -s defaults.env .env
 endif
 endif
