@@ -1,6 +1,6 @@
 services:
   manager:
-    image: ucphhpc/gocd-server-swarm:${TAG}
+    image: ucphhpc/gocd-server-swarm:v25.3.0
     networks:
       - nginx-proxy
     deploy:
