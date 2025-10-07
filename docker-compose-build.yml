@@ -1,6 +1,6 @@
 services:
   manager:
-    image: ucphhpc/gocd-server-swarm:$TAG
+    image: ucphhpc/gocd-server-swarm:${TAG}
     build:
       context: ./
       dockerfile: Dockerfile
@@ -30,26 +30,6 @@ services:
         GO_PLUGINS_BUNDLED_DIR: ${GO_PLUGINS_BUNDLED_DIR}
         GO_PLUGINS_EXTERNAL_DIR: ${GO_PLUGINS_EXTERNAL_DIR}
         GO_SECRET_DIR: ${GO_SECRET_DIR}
-    networks:
-      - nginx-proxy
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-    volumes:
-      - ./docker-entrypoint.d:/docker-entrypoint.d:rw
-      - /var/run/docker.sock:/var/run/docker.sock:rw
-      - godata:/godata:rw
-      # Secrets are stored in the regular host FS, and mapped into the container
-      - ${GO_SECRET_DIR}:${GO_SECRET_DIR}:rw
-    ports:
-      - 8153:8153
     env_file:
       - .env
     user: "${UID}:${GID}"
-
-volumes:
-  godata:
-
-networks:
- nginx-proxy:
-   external: true

@@ -32,7 +32,7 @@ endif
 
 .PHONY: dockerbuild
 dockerbuild:
-	${DOCKER_COMPOSE} build ${ARGS}
+	${DOCKER_COMPOSE} -f docker-compose-build.yml build ${ARGS}
 
 .PHONY: dockerclean
 dockerclean:
@@ -44,7 +44,7 @@ dockerpush:
 
 .PHONY: daemon
 daemon:
-	${DOCKER} stack config -c docker-compose.yml | ${DOCKER} stack deploy -c - ${SERVICE_NAME} ${ARGS}
+	${DOCKER} stack config -c docker-compose-deploy.yml | ${DOCKER} stack deploy -c - ${SERVICE_NAME} ${ARGS}
 
 .PHONY: down
 down:
