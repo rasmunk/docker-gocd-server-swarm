@@ -30,7 +30,9 @@ pipelines:
     parameters:
       IMAGE: docker-gocd-server-swarm
       SRC_DIRECTORY: gocd-server-swarm
-      BUILD_MAKE_ARGS: "dockerbuild\n ARGS='--no-cache'"
+      BUILD_MAKE_ARGS:
+        - dockerbuild
+        - ARGS='--no-cache'
       TEST_DIRECTORY: gocd-server-swarm
       TEST_MAKE_ARGS: test
       PUSH_DIRECTORY: publish-docker-scripts
