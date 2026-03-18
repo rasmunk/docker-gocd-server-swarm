@@ -44,7 +44,8 @@ dockerpush:
 
 .PHONY: daemon
 daemon:
-	${DOCKER} stack config -c docker-compose-deploy.yml | ${DOCKER} stack deploy -c - ${SERVICE_NAME} ${ARGS}
+#	${DOCKER} stack config -c docker-compose-deploy.yml | ${DOCKER} stack deploy -c - ${SERVICE_NAME} ${ARGS}
+	./bin/deploy-daemon-stack.sh ${DOCKER} docker-compose-deploy.yml ${SERVICE_NAME}
 
 .PHONY: down
 down:
