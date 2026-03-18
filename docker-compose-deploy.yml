@@ -16,7 +16,7 @@ services:
       - 8153:8153
     env_file:
       - .env
-    user: "${UID}:${GID}"
+    user: "${GOCD_UID}:${GOCD_GID}"
 
 volumes:
   godata:

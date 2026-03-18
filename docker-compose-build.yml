@@ -7,8 +7,8 @@ services:
       # IMPORTANT: pass all ARGs used in Dockerfile here to allow optional override from .env file
       args:
         TAG: ${TAG}
-        UID: ${UID}
-        GID: ${GID}
+        GOCD_UID: ${GOCD_UID}
+        GOCD_GID: ${GOCD_GID}
         GROUP: ${GROUP}
         PLUGIN_SWARM_MAJOR_VERSION: ${PLUGIN_SWARM_MAJOR_VERSION}
         PLUGIN_SWARM_MINOR_VERSION: ${PLUGIN_SWARM_MINOR_VERSION}
@@ -32,4 +32,4 @@ services:
         GO_SECRET_DIR: ${GO_SECRET_DIR}
     env_file:
       - .env
-    user: "${UID}:${GID}"
+    user: "${GOCD_UID}:${GOCD_GID}"

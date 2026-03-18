@@ -6,7 +6,7 @@ LABEL MAINTAINER="Rasmus Munk <rasmus.munk@nbi.ku.dk>"
 ENV USER=go
 
 ARG GROUP
-ARG GID
+ARG GOCD_GID
 
 # When the ENV file is passed in
 # the docker-compose file
@@ -51,7 +51,7 @@ USER root
 RUN apk add tzdata python3 py3-pip wget
 
 # Add an extra group an assign it to the ${USER}
-RUN addgroup -g ${GID} ${GROUP} && \
+RUN addgroup -g ${GOCD_GID} ${GROUP} && \
     adduser ${USER} ${GROUP} && \
     adduser ${USER} wheel && \
     adduser ${USER} root
