@@ -1,4 +1,4 @@
-FROM gocd/gocd-server:v25.3.0
+FROM gocd/gocd-server:v25.4.0
 
 LABEL MAINTAINER="Rasmus Munk <rasmus.munk@nbi.ku.dk>"
 
