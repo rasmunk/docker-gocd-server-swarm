@@ -5,17 +5,28 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    target-branch: "master"
+    target-branch: "main"
     allow:
      - dependency-name: "production"
        update-types:
         - "version-update:semver-minor"
         - "version-update:semver-patch"
-     - dependency-name: "development"
-       update-types:
-        - "version-update:semver-minor"
-        - "version-update:semver-patch"
-        - "version-update:semver-major"
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+      - "docker"
+  - package-ecosystem: "docker"
+    directory: "."
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    target-branch: "master"
+    allow:
+     - dependency-name: "development"
+       update-types:
+        - "version-update:semver-major"
+        - "version-update:semver-minor"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
