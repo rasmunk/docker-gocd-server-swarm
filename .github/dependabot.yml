@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "."
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -16,7 +16,7 @@ updates:
       - "dependencies"
       - "docker"
   - package-ecosystem: "docker"
-    directory: "."
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
