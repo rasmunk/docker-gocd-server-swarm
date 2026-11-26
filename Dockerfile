@@ -1,4 +1,4 @@
-FROM gocd/gocd-server:v26.1.0
+FROM gocd/gocd-server:v26.2.0
 
 LABEL MAINTAINER="Rasmus Munk <rasmus.munk@nbi.ku.dk>"
 
@@ -48,7 +48,7 @@ ENV PATH="${PATH}:/gocd-jre/bin"
 USER root
 
 # Ensure that the timezone is automatically picked up
-RUN apk add tzdata python3 py3-pip wget
+RUN apk add tzdata python3 py3-pip wget glibc glibc-dev
 
 # Add an extra group an assign it to the ${USER}
 RUN addgroup -g ${GOCD_GID} ${GROUP} && \
