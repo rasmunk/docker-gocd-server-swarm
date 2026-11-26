@@ -36,6 +36,7 @@ pipelines:
       TEST_MAKE_TARGET: test
       TEST_MAKE_ARGS: ""
       PUSH_DIRECTORY: publish-docker-scripts
+      PUSH_TARGET: "dockerpush"
       DEFAULT_TAG: latest
       EXTRA_TAG: v26.2.0
       COMMIT_TAG: GO_REVISION_GOCD_SERVER_SWARM_GIT

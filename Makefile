@@ -39,7 +39,7 @@ dockerclean:
 	${DOCKER} rmi -f ${OWNER}/${IMAGE}:${TAG}
 
 .PHONY: dockerpush
-dockerpush:
+dockerpush: dockerbuild
 	${DOCKER} push ${OWNER}/${IMAGE}:${TAG}
 
 .PHONY: daemon
