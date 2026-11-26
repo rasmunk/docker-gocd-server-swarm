@@ -52,7 +52,7 @@ down:
 	${DOCKER} stack rm ${SERVICE_NAME} ${ARGS}
 
 .PHONY: clean
-clean: distclean dockerclean
+clean: dockerclean
 	rm -fr .env
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
