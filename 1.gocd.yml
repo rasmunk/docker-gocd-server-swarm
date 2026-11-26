@@ -2,8 +2,6 @@ environments:
   docker_image:
     environments:
       GIT_USER: "{{SECRET:[github][username]}}"
-      DOCKERHUB_PASSWORD: '{{SECRET:[dockerhub][password]}}'
-      DOCKERHUB_USERNAME: '{{SECRET:[dockerhub][username]}}'
     pipelines:
       - gocd-server-swarm
 pipelines:
@@ -33,7 +31,7 @@ pipelines:
       IMAGE: docker-gocd-server-swarm
       SRC_DIRECTORY: gocd-server-swarm
       BUILD_MAKE_TARGET: all
-      BUILD_MAKE_ARGS: "ARGS='--no-cache'"
+      BUILD_MAKE_ARGS: "--no-cache"
       TEST_DIRECTORY: gocd-server-swarm
       TEST_MAKE_TARGET: test
       TEST_MAKE_ARGS: ""
